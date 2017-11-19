@@ -89,7 +89,6 @@ namespace furdown
                 http.DefaultRequestHeaders.Clear();
                 http.DefaultRequestHeaders.Add("Cookie", cookies);
                 string cpage = await http.GetStringAsync("https://www.furaffinity.net/");
-                System.Windows.Forms.Clipboard.SetText(cpage);
                 // authorized
                 if (cpage.Contains("\"logout-link\""))
                 {
