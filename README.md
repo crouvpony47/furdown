@@ -8,6 +8,8 @@ Yet another mass downloader for FurAffinity.net.
 
 
 
+[Download stable win32 build.](https://github.com/crouvpony47/furdown/raw/master/bin-stable/furdown.exe)
+
 System requirements:
 
 - Windows Vista SP2 or newer, might not work on server editions
