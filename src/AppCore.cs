@@ -201,6 +201,17 @@ namespace furdown
                 string subId = subs[i];
                 // don't care about empty strings
                 if (subId == null || subId.CompareTo("") == 0) continue;
+                // check if in DB already
+                try
+                {
+                    if (SubmissionsDB.DB.Exists(uint.Parse(subId)) 
+                        && GlobalSettings.Settings.downloadOnlyOnce) continue;
+                }
+                catch
+                {
+                    Console.WriteLine("Unexpected ");
+                    continue;
+                }
                 string subUrl = "https://www.furaffinity.net/view/" + subId;
                 // get submission page
                 int attempts = 3;
@@ -303,6 +314,7 @@ namespace furdown
                 Console.WriteLine("target filename: " + fname);
                 if (File.Exists(fnamefull))
                 {
+                    SubmissionsDB.DB.AddSubmission(uint.Parse(subId));
                     Console.WriteLine("Already exists, continuing~");
                     continue;
                 }
@@ -317,6 +329,7 @@ namespace furdown
                             FileMode.Create, FileAccess.Write, FileShare.None, 1024*1024 /*Mb*/, true))
                     {
                         await contentStream.CopyToAsync(stream);
+                        SubmissionsDB.DB.AddSubmission(uint.Parse(subId));
                     }
                 }
                 catch (Exception E)
@@ -346,6 +359,8 @@ namespace furdown
             {
                 Console.WriteLine("Failed to save list of subs with issues: " + E.Message);
             }
+            // save DB
+            SubmissionsDB.Save();
             // return result, actually
             return res;
         }

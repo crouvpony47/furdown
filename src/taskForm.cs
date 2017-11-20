@@ -21,6 +21,11 @@ namespace furdown
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Save new settings and apply them
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void applyNSaveBtn_Click(object sender, EventArgs e)
         {
             try
@@ -37,15 +42,23 @@ namespace furdown
             GlobalSettings.Settings.systemPath = systemPathBox.Text;
             GlobalSettings.Settings.filenameTemplate = filenameTemplateBox.Text;
             GlobalSettings.Settings.descrFilenameTemplate = descrFilenameBox.Text;
+            GlobalSettings.Settings.downloadOnlyOnce = neverDownloadTwiceCheckBox.Checked;
+            GlobalSettings.GlobalSettingsSave();
             mainTabControl.SelectedTab = tasksTab;
         }
 
+        /// <summary>
+        /// Load settings into GUI elements.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void taskForm_Shown(object sender, EventArgs e)
         {
             downloadPathBox.Text = GlobalSettings.Settings.downloadPath;
             systemPathBox.Text = GlobalSettings.Settings.systemPath;
             filenameTemplateBox.Text = GlobalSettings.Settings.filenameTemplate;
             descrFilenameBox.Text = GlobalSettings.Settings.descrFilenameTemplate;
+            neverDownloadTwiceCheckBox.Checked = GlobalSettings.Settings.downloadOnlyOnce;
         }
 
         private async void galleryDownloadBtn_Click(object sender, EventArgs e)
@@ -70,23 +83,7 @@ namespace furdown
         {
             closeOnClosingThis.Close();
         }
-
-        private void submUrlsTextBox_Leave(object sender, EventArgs e)
-        {
-            submUrlsTextBox.Text = submUrlsTextBox.Text.ToLower();
-            string[] toremove = {
-                "https://", "http://", "furaffinity.net/view/", "furaffinity.net/full/", "/", "www."
-            };
-            foreach(string r in toremove)
-                submUrlsTextBox.Text = submUrlsTextBox.Text.Replace(r, "");
-            if (!System.Text.RegularExpressions.Regex.IsMatch(submUrlsTextBox.Text, @"^[0-9\r\n]+$")
-                && submUrlsTextBox.Text.CompareTo("") != 0)
-            {
-                submUrlsTextBox.Text = "";
-                MessageBox.Show("Only IDs or URLs, one per line, are allowed.");
-            }
-        }
-
+        
         private void submUrlsLoadPrvBtn_Click(object sender, EventArgs e)
         {
             string log = Path.Combine(GlobalSettings.Settings.systemPath, "latest_subs.log");
@@ -143,6 +140,106 @@ namespace furdown
             if (folderBrowserDialog.ShowDialog() == DialogResult.Cancel)
                 return;
             systemPathBox.Text = folderBrowserDialog.SelectedPath;
+        }
+
+        #region submissions lists validation
+        /// <summary>
+        /// Extracts submissions IDs from text containing URLs and newline characters.
+        /// Returns false if any unexpected characters are found.
+        /// </summary>
+        private static bool submUrlsListValidate(ref string text)
+        {
+            text = text.ToLower();
+            string[] toremove = {
+                "https://", "http://", "furaffinity.net/view/", "furaffinity.net/full/", "/", "www."
+            };
+            foreach (string r in toremove)
+                text = text.Replace(r, "");
+            if (!System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9\r\n]+$")
+                && text.CompareTo("") != 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private void submUrlsTextBox_Leave(object sender, EventArgs e)
+        {
+            string s = submUrlsTextBox.Text;
+            if (!submUrlsListValidate(ref s))
+            {
+                submUrlsTextBox.Text = "";
+                MessageBox.Show("Only IDs or URLs, one per line, are allowed.");
+            }
+            else
+            {
+                submUrlsTextBox.Text = s;
+            }
+        }
+
+        private void dbSubmTextBox_Leave(object sender, EventArgs e)
+        {
+            string s = dbSubmTextBox.Text;
+            if (!submUrlsListValidate(ref s))
+            {
+                dbSubmTextBox.Text = "";
+                MessageBox.Show("Only IDs or URLs, one per line, are allowed.");
+            }
+            else
+            {
+                dbSubmTextBox.Text = s;
+            }
+        }
+        #endregion
+
+        private void clearDbBtn_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("Are you sure you want to clear the database?", "<!>", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                SubmissionsDB.DB.Clear();
+                MessageBox.Show("Done.");
+            }
+        }
+
+        private void addIdsToDbBtn_Click(object sender, EventArgs e)
+        {
+            int counter = 0;
+            string[] lines = dbSubmTextBox.Lines;
+            dbSubmTextBox.Text = "";
+            for (int i = 0; i < lines.Count(); i++)
+            {
+                try
+                {
+                    if (SubmissionsDB.DB.AddSubmission(uint.Parse(lines[i])))
+                        counter++;
+                    else
+                        dbSubmTextBox.Text += lines[i] + Environment.NewLine;
+                }
+                catch { } // not an integer - do not care
+            }
+            SubmissionsDB.Save();
+            MessageBox.Show(counter.ToString() + " submissions have been added.");
+        }
+
+        private void removeIdsFromDb_Click(object sender, EventArgs e)
+        {
+            int counter = 0;
+            string[] lines = dbSubmTextBox.Lines;
+            dbSubmTextBox.Text = "";
+            for (int i = 0; i < lines.Count(); i++)
+            {
+                try
+                {
+                    if (SubmissionsDB.DB.RemoveSubmission(uint.Parse(lines[i])))
+                        counter++;
+                    else
+                        dbSubmTextBox.Text += lines[i] + Environment.NewLine;
+                }
+                catch { } // not an integer - do not care
+            }
+            SubmissionsDB.Save();
+            MessageBox.Show(counter.ToString() + " submissions have been removed.");
         }
     }
 }

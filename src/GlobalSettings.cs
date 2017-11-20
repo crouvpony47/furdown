@@ -14,6 +14,7 @@ namespace furdown
         public string downloadPath;
         public string filenameTemplate;
         public string descrFilenameTemplate;
+        public bool downloadOnlyOnce;
         
         [NonSerialized]
         public static GlobalSettings Settings;
@@ -32,21 +33,36 @@ namespace furdown
             appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             settingsFN = Path.Combine(appDataPath, "furdown\\furdown.conf");
             // if settings file exists, load it
+            bool needToSetDefaults = false;
             if (File.Exists(settingsFN))
             {
                 using (Stream stream = File.Open(settingsFN, FileMode.Open))
                 {
                     var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-                    Settings = (GlobalSettings)bformatter.Deserialize(stream);
+                    try
+                    {
+                        Settings = (GlobalSettings)bformatter.Deserialize(stream);
+                    }
+                    // settings file is present, but failed to be loaded
+                    catch
+                    {
+                        needToSetDefaults = true;
+                        Console.WriteLine("Settings file is incompatible or corrupted, restoring defaults.");
+                    }
                 }
             }
-            // else set defaults
             else
+            {
+                needToSetDefaults = true;
+            }
+            // set defaults, if settings file does not exist or otherwise not loaded
+            if (needToSetDefaults)
             {
                 Settings.downloadPath = Path.Combine(appDataPath, "furdown\\downloads");
                 Settings.systemPath = Path.Combine(appDataPath, "furdown\\system");
                 Settings.filenameTemplate = "%ARTIST%\\%SUBMID%.%FILEPART%";
                 Settings.descrFilenameTemplate = "%ARTIST%\\%SUBMID%.%FILEPART%.dsc.htm";
+                Settings.downloadOnlyOnce = true;
                 try { 
                     Directory.CreateDirectory(Settings.downloadPath);
                     Directory.CreateDirectory(Settings.systemPath);
@@ -56,6 +72,7 @@ namespace furdown
                     Console.WriteLine("[Error] Default paths are invalid!");
                 }
             }
+            SubmissionsDB.Load();
         }
 
         /// <summary>
@@ -66,11 +83,12 @@ namespace furdown
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(settingsFN));
-                using (Stream stream = File.Open(settingsFN, FileMode.Open))
+                using (Stream stream = File.Open(settingsFN, FileMode.Create))
                 {
                     var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
                     bformatter.Serialize(stream, Settings);
                 }
+                SubmissionsDB.Save();
             }
             catch
             {

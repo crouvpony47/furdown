@@ -31,6 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(taskForm));
             this.mainTabControl = new System.Windows.Forms.TabControl();
             this.tasksTab = new System.Windows.Forms.TabPage();
+            this.submUrlsGroupBox = new System.Windows.Forms.GroupBox();
+            this.submUrlsDownloadBtn = new System.Windows.Forms.Button();
+            this.submUrlsLoadFileBtn = new System.Windows.Forms.Button();
+            this.submUrlsLoadPrvBtn = new System.Windows.Forms.Button();
+            this.submUrlsDescrCheckBox = new System.Windows.Forms.CheckBox();
+            this.submUrlsTextBox = new System.Windows.Forms.TextBox();
             this.galleryGroupBox = new System.Windows.Forms.GroupBox();
             this.galleryDescrCheckBox = new System.Windows.Forms.CheckBox();
             this.galleryDownloadBtn = new System.Windows.Forms.Button();
@@ -49,25 +55,29 @@
             this.downloadPathLabel = new System.Windows.Forms.Label();
             this.downloadPathBrowse = new System.Windows.Forms.Button();
             this.downloadPathBox = new System.Windows.Forms.TextBox();
-            this.submUrlsGroupBox = new System.Windows.Forms.GroupBox();
-            this.submUrlsTextBox = new System.Windows.Forms.TextBox();
-            this.submUrlsDescrCheckBox = new System.Windows.Forms.CheckBox();
-            this.submUrlsLoadPrvBtn = new System.Windows.Forms.Button();
-            this.submUrlsLoadFileBtn = new System.Windows.Forms.Button();
-            this.submUrlsDownloadBtn = new System.Windows.Forms.Button();
+            this.databaseTab = new System.Windows.Forms.TabPage();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.dbGroupBox = new System.Windows.Forms.GroupBox();
+            this.clearDbBtn = new System.Windows.Forms.Button();
+            this.removeIdsFromDb = new System.Windows.Forms.Button();
+            this.addIdsToDbBtn = new System.Windows.Forms.Button();
+            this.dbSubmTextBox = new System.Windows.Forms.TextBox();
+            this.neverDownloadTwiceCheckBox = new System.Windows.Forms.CheckBox();
             this.mainTabControl.SuspendLayout();
             this.tasksTab.SuspendLayout();
+            this.submUrlsGroupBox.SuspendLayout();
             this.galleryGroupBox.SuspendLayout();
             this.settingsTab.SuspendLayout();
-            this.submUrlsGroupBox.SuspendLayout();
+            this.databaseTab.SuspendLayout();
+            this.dbGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainTabControl
             // 
             this.mainTabControl.Controls.Add(this.tasksTab);
             this.mainTabControl.Controls.Add(this.settingsTab);
+            this.mainTabControl.Controls.Add(this.databaseTab);
             this.mainTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTabControl.Location = new System.Drawing.Point(0, 0);
             this.mainTabControl.Name = "mainTabControl";
@@ -87,6 +97,77 @@
             this.tasksTab.TabIndex = 0;
             this.tasksTab.Text = "Tasks";
             this.tasksTab.UseVisualStyleBackColor = true;
+            // 
+            // submUrlsGroupBox
+            // 
+            this.submUrlsGroupBox.Controls.Add(this.submUrlsDownloadBtn);
+            this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadFileBtn);
+            this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadPrvBtn);
+            this.submUrlsGroupBox.Controls.Add(this.submUrlsDescrCheckBox);
+            this.submUrlsGroupBox.Controls.Add(this.submUrlsTextBox);
+            this.submUrlsGroupBox.Location = new System.Drawing.Point(8, 112);
+            this.submUrlsGroupBox.Name = "submUrlsGroupBox";
+            this.submUrlsGroupBox.Size = new System.Drawing.Size(681, 112);
+            this.submUrlsGroupBox.TabIndex = 1;
+            this.submUrlsGroupBox.TabStop = false;
+            this.submUrlsGroupBox.Text = "Download a list of submissions";
+            // 
+            // submUrlsDownloadBtn
+            // 
+            this.submUrlsDownloadBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.submUrlsDownloadBtn.Location = new System.Drawing.Point(512, 83);
+            this.submUrlsDownloadBtn.Name = "submUrlsDownloadBtn";
+            this.submUrlsDownloadBtn.Size = new System.Drawing.Size(163, 23);
+            this.submUrlsDownloadBtn.TabIndex = 5;
+            this.submUrlsDownloadBtn.Text = "Go!";
+            this.submUrlsDownloadBtn.UseVisualStyleBackColor = true;
+            this.submUrlsDownloadBtn.Click += new System.EventHandler(this.submUrlsDownloadBtn_Click);
+            // 
+            // submUrlsLoadFileBtn
+            // 
+            this.submUrlsLoadFileBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.submUrlsLoadFileBtn.Location = new System.Drawing.Point(512, 46);
+            this.submUrlsLoadFileBtn.Name = "submUrlsLoadFileBtn";
+            this.submUrlsLoadFileBtn.Size = new System.Drawing.Size(163, 23);
+            this.submUrlsLoadFileBtn.TabIndex = 4;
+            this.submUrlsLoadFileBtn.Text = "Load from file";
+            this.submUrlsLoadFileBtn.UseVisualStyleBackColor = true;
+            this.submUrlsLoadFileBtn.Click += new System.EventHandler(this.submUrlsLoadFileBtn_Click);
+            // 
+            // submUrlsLoadPrvBtn
+            // 
+            this.submUrlsLoadPrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.submUrlsLoadPrvBtn.Location = new System.Drawing.Point(512, 17);
+            this.submUrlsLoadPrvBtn.Name = "submUrlsLoadPrvBtn";
+            this.submUrlsLoadPrvBtn.Size = new System.Drawing.Size(163, 23);
+            this.submUrlsLoadPrvBtn.TabIndex = 3;
+            this.submUrlsLoadPrvBtn.Text = "Load previous";
+            this.submUrlsLoadPrvBtn.UseVisualStyleBackColor = true;
+            this.submUrlsLoadPrvBtn.Click += new System.EventHandler(this.submUrlsLoadPrvBtn_Click);
+            // 
+            // submUrlsDescrCheckBox
+            // 
+            this.submUrlsDescrCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.submUrlsDescrCheckBox.AutoSize = true;
+            this.submUrlsDescrCheckBox.Location = new System.Drawing.Point(6, 89);
+            this.submUrlsDescrCheckBox.Name = "submUrlsDescrCheckBox";
+            this.submUrlsDescrCheckBox.Size = new System.Drawing.Size(153, 17);
+            this.submUrlsDescrCheckBox.TabIndex = 2;
+            this.submUrlsDescrCheckBox.Text = "also save .htm descriptions";
+            this.submUrlsDescrCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // submUrlsTextBox
+            // 
+            this.submUrlsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.submUrlsTextBox.Location = new System.Drawing.Point(6, 19);
+            this.submUrlsTextBox.Multiline = true;
+            this.submUrlsTextBox.Name = "submUrlsTextBox";
+            this.submUrlsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.submUrlsTextBox.Size = new System.Drawing.Size(493, 64);
+            this.submUrlsTextBox.TabIndex = 0;
+            this.submUrlsTextBox.Leave += new System.EventHandler(this.submUrlsTextBox_Leave);
             // 
             // galleryGroupBox
             // 
@@ -137,6 +218,7 @@
             // settingsTab
             // 
             this.settingsTab.AutoScroll = true;
+            this.settingsTab.Controls.Add(this.neverDownloadTwiceCheckBox);
             this.settingsTab.Controls.Add(this.descrFilenameLabel);
             this.settingsTab.Controls.Add(this.descrFilenameBox);
             this.settingsTab.Controls.Add(this.applyNSaveBtn);
@@ -176,7 +258,7 @@
             // 
             // applyNSaveBtn
             // 
-            this.applyNSaveBtn.Location = new System.Drawing.Point(11, 324);
+            this.applyNSaveBtn.Location = new System.Drawing.Point(11, 369);
             this.applyNSaveBtn.Name = "applyNSaveBtn";
             this.applyNSaveBtn.Size = new System.Drawing.Size(116, 27);
             this.applyNSaveBtn.TabIndex = 13;
@@ -274,80 +356,90 @@
             this.downloadPathBox.Size = new System.Drawing.Size(308, 20);
             this.downloadPathBox.TabIndex = 3;
             // 
-            // submUrlsGroupBox
+            // databaseTab
             // 
-            this.submUrlsGroupBox.Controls.Add(this.submUrlsDownloadBtn);
-            this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadFileBtn);
-            this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadPrvBtn);
-            this.submUrlsGroupBox.Controls.Add(this.submUrlsDescrCheckBox);
-            this.submUrlsGroupBox.Controls.Add(this.submUrlsTextBox);
-            this.submUrlsGroupBox.Location = new System.Drawing.Point(8, 112);
-            this.submUrlsGroupBox.Name = "submUrlsGroupBox";
-            this.submUrlsGroupBox.Size = new System.Drawing.Size(681, 112);
-            this.submUrlsGroupBox.TabIndex = 1;
-            this.submUrlsGroupBox.TabStop = false;
-            this.submUrlsGroupBox.Text = "Download a list of submissions";
-            // 
-            // submUrlsTextBox
-            // 
-            this.submUrlsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.submUrlsTextBox.Location = new System.Drawing.Point(6, 19);
-            this.submUrlsTextBox.Multiline = true;
-            this.submUrlsTextBox.Name = "submUrlsTextBox";
-            this.submUrlsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.submUrlsTextBox.Size = new System.Drawing.Size(493, 64);
-            this.submUrlsTextBox.TabIndex = 0;
-            this.submUrlsTextBox.Leave += new System.EventHandler(this.submUrlsTextBox_Leave);
-            // 
-            // submUrlsDescrCheckBox
-            // 
-            this.submUrlsDescrCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.submUrlsDescrCheckBox.AutoSize = true;
-            this.submUrlsDescrCheckBox.Location = new System.Drawing.Point(6, 89);
-            this.submUrlsDescrCheckBox.Name = "submUrlsDescrCheckBox";
-            this.submUrlsDescrCheckBox.Size = new System.Drawing.Size(153, 17);
-            this.submUrlsDescrCheckBox.TabIndex = 2;
-            this.submUrlsDescrCheckBox.Text = "also save .htm descriptions";
-            this.submUrlsDescrCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // submUrlsLoadPrvBtn
-            // 
-            this.submUrlsLoadPrvBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.submUrlsLoadPrvBtn.Location = new System.Drawing.Point(512, 17);
-            this.submUrlsLoadPrvBtn.Name = "submUrlsLoadPrvBtn";
-            this.submUrlsLoadPrvBtn.Size = new System.Drawing.Size(163, 23);
-            this.submUrlsLoadPrvBtn.TabIndex = 3;
-            this.submUrlsLoadPrvBtn.Text = "Load previous";
-            this.submUrlsLoadPrvBtn.UseVisualStyleBackColor = true;
-            this.submUrlsLoadPrvBtn.Click += new System.EventHandler(this.submUrlsLoadPrvBtn_Click);
-            // 
-            // submUrlsLoadFileBtn
-            // 
-            this.submUrlsLoadFileBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.submUrlsLoadFileBtn.Location = new System.Drawing.Point(512, 46);
-            this.submUrlsLoadFileBtn.Name = "submUrlsLoadFileBtn";
-            this.submUrlsLoadFileBtn.Size = new System.Drawing.Size(163, 23);
-            this.submUrlsLoadFileBtn.TabIndex = 4;
-            this.submUrlsLoadFileBtn.Text = "Load from file";
-            this.submUrlsLoadFileBtn.UseVisualStyleBackColor = true;
-            this.submUrlsLoadFileBtn.Click += new System.EventHandler(this.submUrlsLoadFileBtn_Click);
-            // 
-            // submUrlsDownloadBtn
-            // 
-            this.submUrlsDownloadBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.submUrlsDownloadBtn.Location = new System.Drawing.Point(512, 83);
-            this.submUrlsDownloadBtn.Name = "submUrlsDownloadBtn";
-            this.submUrlsDownloadBtn.Size = new System.Drawing.Size(163, 23);
-            this.submUrlsDownloadBtn.TabIndex = 5;
-            this.submUrlsDownloadBtn.Text = "Go!";
-            this.submUrlsDownloadBtn.UseVisualStyleBackColor = true;
-            this.submUrlsDownloadBtn.Click += new System.EventHandler(this.submUrlsDownloadBtn_Click);
+            this.databaseTab.Controls.Add(this.dbGroupBox);
+            this.databaseTab.Location = new System.Drawing.Point(4, 22);
+            this.databaseTab.Name = "databaseTab";
+            this.databaseTab.Padding = new System.Windows.Forms.Padding(3);
+            this.databaseTab.Size = new System.Drawing.Size(697, 317);
+            this.databaseTab.TabIndex = 2;
+            this.databaseTab.Text = "Database";
+            this.databaseTab.UseVisualStyleBackColor = true;
             // 
             // openFileDialog
             // 
             this.openFileDialog.Filter = "Text Files (*.txt, *.log)|*.text;*.txt;*.log|All Files|*.*";
+            // 
+            // dbGroupBox
+            // 
+            this.dbGroupBox.Controls.Add(this.clearDbBtn);
+            this.dbGroupBox.Controls.Add(this.removeIdsFromDb);
+            this.dbGroupBox.Controls.Add(this.addIdsToDbBtn);
+            this.dbGroupBox.Controls.Add(this.dbSubmTextBox);
+            this.dbGroupBox.Location = new System.Drawing.Point(8, 6);
+            this.dbGroupBox.Name = "dbGroupBox";
+            this.dbGroupBox.Size = new System.Drawing.Size(681, 181);
+            this.dbGroupBox.TabIndex = 2;
+            this.dbGroupBox.TabStop = false;
+            this.dbGroupBox.Text = "Downloaded submissions database manipulation";
+            // 
+            // clearDbBtn
+            // 
+            this.clearDbBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.clearDbBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.clearDbBtn.Location = new System.Drawing.Point(6, 147);
+            this.clearDbBtn.Name = "clearDbBtn";
+            this.clearDbBtn.Size = new System.Drawing.Size(163, 23);
+            this.clearDbBtn.TabIndex = 5;
+            this.clearDbBtn.Text = "Clear database";
+            this.clearDbBtn.UseVisualStyleBackColor = true;
+            this.clearDbBtn.Click += new System.EventHandler(this.clearDbBtn_Click);
+            // 
+            // removeIdsFromDb
+            // 
+            this.removeIdsFromDb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeIdsFromDb.Location = new System.Drawing.Point(512, 46);
+            this.removeIdsFromDb.Name = "removeIdsFromDb";
+            this.removeIdsFromDb.Size = new System.Drawing.Size(163, 23);
+            this.removeIdsFromDb.TabIndex = 4;
+            this.removeIdsFromDb.Text = "Remove from DB";
+            this.removeIdsFromDb.UseVisualStyleBackColor = true;
+            this.removeIdsFromDb.Click += new System.EventHandler(this.removeIdsFromDb_Click);
+            // 
+            // addIdsToDbBtn
+            // 
+            this.addIdsToDbBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.addIdsToDbBtn.Location = new System.Drawing.Point(512, 17);
+            this.addIdsToDbBtn.Name = "addIdsToDbBtn";
+            this.addIdsToDbBtn.Size = new System.Drawing.Size(163, 23);
+            this.addIdsToDbBtn.TabIndex = 3;
+            this.addIdsToDbBtn.Text = "Add to DB as downloaded";
+            this.addIdsToDbBtn.UseVisualStyleBackColor = true;
+            this.addIdsToDbBtn.Click += new System.EventHandler(this.addIdsToDbBtn_Click);
+            // 
+            // dbSubmTextBox
+            // 
+            this.dbSubmTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dbSubmTextBox.Location = new System.Drawing.Point(6, 19);
+            this.dbSubmTextBox.Multiline = true;
+            this.dbSubmTextBox.Name = "dbSubmTextBox";
+            this.dbSubmTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.dbSubmTextBox.Size = new System.Drawing.Size(493, 122);
+            this.dbSubmTextBox.TabIndex = 0;
+            this.dbSubmTextBox.Leave += new System.EventHandler(this.dbSubmTextBox_Leave);
+            // 
+            // neverDownloadTwiceCheckBox
+            // 
+            this.neverDownloadTwiceCheckBox.AutoSize = true;
+            this.neverDownloadTwiceCheckBox.Location = new System.Drawing.Point(14, 330);
+            this.neverDownloadTwiceCheckBox.Name = "neverDownloadTwiceCheckBox";
+            this.neverDownloadTwiceCheckBox.Size = new System.Drawing.Size(215, 17);
+            this.neverDownloadTwiceCheckBox.TabIndex = 16;
+            this.neverDownloadTwiceCheckBox.Text = "Don\'t download files downloaded before";
+            this.neverDownloadTwiceCheckBox.UseVisualStyleBackColor = true;
             // 
             // taskForm
             // 
@@ -363,12 +455,15 @@
             this.Shown += new System.EventHandler(this.taskForm_Shown);
             this.mainTabControl.ResumeLayout(false);
             this.tasksTab.ResumeLayout(false);
+            this.submUrlsGroupBox.ResumeLayout(false);
+            this.submUrlsGroupBox.PerformLayout();
             this.galleryGroupBox.ResumeLayout(false);
             this.galleryGroupBox.PerformLayout();
             this.settingsTab.ResumeLayout(false);
             this.settingsTab.PerformLayout();
-            this.submUrlsGroupBox.ResumeLayout(false);
-            this.submUrlsGroupBox.PerformLayout();
+            this.databaseTab.ResumeLayout(false);
+            this.dbGroupBox.ResumeLayout(false);
+            this.dbGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -403,5 +498,12 @@
         private System.Windows.Forms.TextBox submUrlsTextBox;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+        private System.Windows.Forms.TabPage databaseTab;
+        private System.Windows.Forms.GroupBox dbGroupBox;
+        private System.Windows.Forms.Button clearDbBtn;
+        private System.Windows.Forms.Button removeIdsFromDb;
+        private System.Windows.Forms.Button addIdsToDbBtn;
+        private System.Windows.Forms.TextBox dbSubmTextBox;
+        private System.Windows.Forms.CheckBox neverDownloadTwiceCheckBox;
     }
 }

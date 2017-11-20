@@ -14,8 +14,9 @@ namespace furdown
         [STAThread]
         static void Main()
         {
-            GlobalSettings.GlobalSettingsInit();
             AppCore.Core = new AppCore();
+            SubmissionsDB.DB = new SubmissionsDB();
+            GlobalSettings.GlobalSettingsInit();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             WebBrowserEmulationSet();
