@@ -8,7 +8,12 @@ Yet another mass downloader for FurAffinity.net.
 
 
 
-[Download stable win32 build.](https://github.com/crouvpony47/furdown/raw/master/bin-stable/furdown.exe)
+[Download stable win32 build.](https://github.com/crouvpony47/furdown/raw/master/bin-stable/furdown.exe) (v.0.3.2.0)
+
+Changelog (v.0.3.2.0):
+- files with corrupt names are now downloaded properly,
+- descriptions are now saved properly (relative paths changed to absolute ones),
+- minor GUI scaling fix
 
 System requirements:
 

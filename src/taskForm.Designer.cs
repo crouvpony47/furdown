@@ -42,6 +42,7 @@
             this.galleryDownloadBtn = new System.Windows.Forms.Button();
             this.galleryUrlBox = new System.Windows.Forms.TextBox();
             this.settingsTab = new System.Windows.Forms.TabPage();
+            this.neverDownloadTwiceCheckBox = new System.Windows.Forms.CheckBox();
             this.descrFilenameLabel = new System.Windows.Forms.Label();
             this.descrFilenameBox = new System.Windows.Forms.TextBox();
             this.applyNSaveBtn = new System.Windows.Forms.Button();
@@ -56,14 +57,13 @@
             this.downloadPathBrowse = new System.Windows.Forms.Button();
             this.downloadPathBox = new System.Windows.Forms.TextBox();
             this.databaseTab = new System.Windows.Forms.TabPage();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.dbGroupBox = new System.Windows.Forms.GroupBox();
             this.clearDbBtn = new System.Windows.Forms.Button();
             this.removeIdsFromDb = new System.Windows.Forms.Button();
             this.addIdsToDbBtn = new System.Windows.Forms.Button();
             this.dbSubmTextBox = new System.Windows.Forms.TextBox();
-            this.neverDownloadTwiceCheckBox = new System.Windows.Forms.CheckBox();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.mainTabControl.SuspendLayout();
             this.tasksTab.SuspendLayout();
             this.submUrlsGroupBox.SuspendLayout();
@@ -100,6 +100,8 @@
             // 
             // submUrlsGroupBox
             // 
+            this.submUrlsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.submUrlsGroupBox.Controls.Add(this.submUrlsDownloadBtn);
             this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadFileBtn);
             this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadPrvBtn);
@@ -240,6 +242,16 @@
             this.settingsTab.Text = "Settings";
             this.settingsTab.UseVisualStyleBackColor = true;
             // 
+            // neverDownloadTwiceCheckBox
+            // 
+            this.neverDownloadTwiceCheckBox.AutoSize = true;
+            this.neverDownloadTwiceCheckBox.Location = new System.Drawing.Point(14, 330);
+            this.neverDownloadTwiceCheckBox.Name = "neverDownloadTwiceCheckBox";
+            this.neverDownloadTwiceCheckBox.Size = new System.Drawing.Size(215, 17);
+            this.neverDownloadTwiceCheckBox.TabIndex = 16;
+            this.neverDownloadTwiceCheckBox.Text = "Don\'t download files downloaded before";
+            this.neverDownloadTwiceCheckBox.UseVisualStyleBackColor = true;
+            // 
             // descrFilenameLabel
             // 
             this.descrFilenameLabel.AutoSize = true;
@@ -367,12 +379,10 @@
             this.databaseTab.Text = "Database";
             this.databaseTab.UseVisualStyleBackColor = true;
             // 
-            // openFileDialog
-            // 
-            this.openFileDialog.Filter = "Text Files (*.txt, *.log)|*.text;*.txt;*.log|All Files|*.*";
-            // 
             // dbGroupBox
             // 
+            this.dbGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dbGroupBox.Controls.Add(this.clearDbBtn);
             this.dbGroupBox.Controls.Add(this.removeIdsFromDb);
             this.dbGroupBox.Controls.Add(this.addIdsToDbBtn);
@@ -386,7 +396,7 @@
             // 
             // clearDbBtn
             // 
-            this.clearDbBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.clearDbBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.clearDbBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.clearDbBtn.Location = new System.Drawing.Point(6, 147);
             this.clearDbBtn.Name = "clearDbBtn";
@@ -431,15 +441,9 @@
             this.dbSubmTextBox.TabIndex = 0;
             this.dbSubmTextBox.Leave += new System.EventHandler(this.dbSubmTextBox_Leave);
             // 
-            // neverDownloadTwiceCheckBox
+            // openFileDialog
             // 
-            this.neverDownloadTwiceCheckBox.AutoSize = true;
-            this.neverDownloadTwiceCheckBox.Location = new System.Drawing.Point(14, 330);
-            this.neverDownloadTwiceCheckBox.Name = "neverDownloadTwiceCheckBox";
-            this.neverDownloadTwiceCheckBox.Size = new System.Drawing.Size(215, 17);
-            this.neverDownloadTwiceCheckBox.TabIndex = 16;
-            this.neverDownloadTwiceCheckBox.Text = "Don\'t download files downloaded before";
-            this.neverDownloadTwiceCheckBox.UseVisualStyleBackColor = true;
+            this.openFileDialog.Filter = "Text Files (*.txt, *.log)|*.text;*.txt;*.log|All Files|*.*";
             // 
             // taskForm
             // 

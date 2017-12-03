@@ -201,15 +201,20 @@ namespace furdown
                 string subId = subs[i];
                 // don't care about empty strings
                 if (subId == null || subId.CompareTo("") == 0) continue;
+                Console.WriteLine("> Processing submission #" + subId);
                 // check if in DB already
                 try
                 {
-                    if (SubmissionsDB.DB.Exists(uint.Parse(subId)) 
-                        && GlobalSettings.Settings.downloadOnlyOnce) continue;
+                    if (SubmissionsDB.DB.Exists(uint.Parse(subId))
+                        && GlobalSettings.Settings.downloadOnlyOnce)
+                    {
+                        Console.WriteLine("Skipped (present in DB)");
+                        continue;
+                    }
                 }
                 catch
                 {
-                    Console.WriteLine("Unexpected ");
+                    Console.WriteLine("Unexpected error (DB presence check failed)!");
                     continue;
                 }
                 string subUrl = "https://www.furaffinity.net/view/" + subId;
@@ -231,7 +236,7 @@ namespace furdown
                         goto beforeawait;
                     else
                     {
-                        Console.WriteLine("Giving up on {0}", subId);
+                        Console.WriteLine("Giving up on #" + subId);
                         res.failedToGetPage.Add(subId);
                         continue;
                     }
@@ -258,17 +263,33 @@ namespace furdown
                     cpage = cpage.Substring(0,
                         cpage.IndexOf(desckeyend, cpage.IndexOf(desckeyend) + 1) + desckeyend.Length
                     );
-                    cpage.Replace("href=\"/", "href=\"https://furaffinity.net/");
-                    cpage.Replace("src=\"//", "src=\"https://");
+                    cpage = cpage.Replace("href=\"/", "href=\"https://furaffinity.net/");
+                    cpage = cpage.Replace("src=\"//", "src=\"https://");
                 }
+                sp.ARTIST = sp.URL.Substring(sp.URL.LastIndexOf(@"/art/") + 5);
+                sp.ARTIST = sp.ARTIST.Substring(0, sp.ARTIST.IndexOf('/'));
                 sp.FILEFULL = sp.URL.Substring(sp.URL.LastIndexOf('/') + 1);
-                // remove characters windows filename can't hold
                 sp.FILEFULL = string.Concat(sp.FILEFULL.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
                 sp.FILEID = sp.FILEFULL.Substring(0, sp.FILEFULL.IndexOf('.'));
-                sp.ARTIST = sp.FILEFULL.Substring(sp.FILEFULL.IndexOf('.') + 1);
-                sp.ARTIST = sp.ARTIST.Substring(0, sp.ARTIST.IndexOf('_'));
-                sp.FILEPART = sp.FILEFULL.Substring(sp.FILEFULL.IndexOf('_') + 1);
-                sp.EXT = (sp.FILEFULL + " ").Substring(sp.FILEFULL.LastIndexOf('.') + 1).TrimEnd();
+                if (sp.FILEFULL.IndexOf('_') >= 0) // valid filename (some names on FA are corrupted and contain nothing but '.' after ID)
+                {
+                    sp.FILEPART = sp.FILEFULL.Substring(sp.FILEFULL.IndexOf('_') + 1);
+                    if (sp.FILEFULL.LastIndexOf('.') >= 0) // has extension
+                    {
+                        sp.EXT = (sp.FILEFULL + " ").Substring(sp.FILEFULL.LastIndexOf('.') + 1).TrimEnd();
+                        if (sp.EXT.CompareTo("") == 0)
+                            sp.EXT = @"jpg";
+                    }
+                    else
+                    {
+                        sp.EXT = @"jpg";
+                    }
+                }
+                else
+                {
+                    sp.FILEPART = @"unknown.jpg";
+                    sp.EXT = @"jpg";
+                }
                 // apply template(s)
                 string fname = GlobalSettings.Settings.filenameTemplate;
                 string dfname = GlobalSettings.Settings.descrFilenameTemplate;
@@ -345,6 +366,7 @@ namespace furdown
                         continue;
                     }
                 }
+                Console.WriteLine("Done: #" + subId);
                 res.processedPerfectly++;
             }
             // writing results
