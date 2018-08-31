@@ -8,12 +8,12 @@ Yet another mass downloader for FurAffinity.net.
 
 
 
-[Download stable win32 build.](https://github.com/crouvpony47/furdown/raw/master/bin-stable/furdown.exe) (v.0.3.2.0)
+[Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-Changelog (v.0.3.2.0):
-- files with corrupt names are now downloaded properly,
-- descriptions are now saved properly (relative paths changed to absolute ones),
-- minor GUI scaling fix
+Changelog (v.0.3.3.0):
+- new feature: downloading several galleries consequentially,
+- better scaling on DPI settings other than 96,
+- minor fixes
 
 System requirements:
 

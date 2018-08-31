@@ -166,15 +166,6 @@ namespace furdown
                     break;
                 }
             }
-            try
-            {
-                Console.WriteLine("Submissions list saved to \"latest_subs.log\"");
-                File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "latest_subs.log"), lst);
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine("Failed to save submissions list: " + E.Message);
-            }
             return lst;
         }
 
