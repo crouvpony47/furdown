@@ -51,10 +51,38 @@ namespace furdown
                 return null;
             }
         }
-        
+
+        /// <summary>
+        /// Reads network stream to another stream, throwing excepton if no data was received in reasonable time
+        /// </summary>
+        /// <param name="from">Readable network stream to copy data from</param>
+        /// <param name="to">Writable stream to copy data to</param>
+        /// <param name="timeout">Timeout for receiving a single chunk of data in milliseconds</param>
+        /// <returns></returns>
+        async private Task ReadNetworkStream(Stream from, Stream to, int timeout)
+        {
+            const int bufferSize = 2048;
+            int receivedBytes = -1;
+            var buffer = new byte[bufferSize];
+            while (receivedBytes != 0) // read until no more data available (or timeout exception is thrown)
+            {
+                using (var cancellationTokenSource = new System.Threading.CancellationTokenSource(timeout))
+                {
+                    using (cancellationTokenSource.Token.Register(() => from.Close()))
+                    {
+                        receivedBytes = await from.ReadAsync(buffer, 0, bufferSize, cancellationTokenSource.Token);
+                    }
+                }
+                if (receivedBytes > 0)
+                {
+                    await to.WriteAsync(buffer, 0, receivedBytes);
+                }
+            }
+        }
+
         public AppCore()
         {
-            // get the console windows
+            // show the console window
             AllocConsole();
             // welcome thing
             Console.WriteLine(@"furdown " + Assembly.GetEntryAssembly().GetName().Version);
@@ -336,17 +364,37 @@ namespace furdown
                 {
                     Console.WriteLine("GET await: " + sp.URL);
                     using (
-                        Stream contentStream = await (await http.GetAsync(sp.URL)).Content.ReadAsStreamAsync(),
-                        stream = new FileStream(fnamefull, 
-                            FileMode.Create, FileAccess.Write, FileShare.None, 1024*1024 /*Mb*/, true))
+                        Stream contentStream = await (
+                            await http.GetAsync(sp.URL, HttpCompletionOption.ResponseHeadersRead)
+                        ).Content.ReadAsStreamAsync(),
+                        stream = new FileStream(
+                            fnamefull,
+                            FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024 /*Mb*/, true
+                        )
+                    )
                     {
-                        await contentStream.CopyToAsync(stream);
+                        await ReadNetworkStream(contentStream, stream, 5000);
+                        // await contentStream.CopyToAsync(stream); // this works, but may hang forever in case of network errors
                         SubmissionsDB.DB.AddSubmission(uint.Parse(subId));
                     }
                 }
                 catch (Exception E)
                 {
-                    Console.WriteLine("GET error (file " + sp.FILEID + "): " + E.Message);
+                    // write error message
+                    if (E is ObjectDisposedException)
+                    {
+                        Console.WriteLine("Network error (data receive timeout)");
+                    }
+                    else
+                    {
+                        Console.WriteLine("GET request error (file " + sp.FILEID + "): " + E.Message);
+                    }
+                    // remove incomplete download
+                    if (File.Exists(fnamefull))
+                    {
+                        File.Delete(fnamefull);
+                    }
+                    // try again or abort operation
                     fattempts--;
                     System.Threading.Thread.Sleep(2000);
                     if (fattempts > 0)
@@ -363,10 +411,11 @@ namespace furdown
             // writing results
             try
             {
-                if (res.failedToGetPage.Count > 0) 
+                if (res.failedToGetPage.Count > 0 || res.failedToDownload.Count > 0)
+                {
                     File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "get_sub_page_failed.log"), res.failedToGetPage);
-                if (res.failedToDownload.Count > 0)
                     File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "download_failed.log"), res.failedToGetPage);
+                }
             }
             catch (Exception E)
             {

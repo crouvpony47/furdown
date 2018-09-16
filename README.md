@@ -10,10 +10,8 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-Changelog (v.0.3.3.0):
-- new feature: downloading several galleries consequentially,
-- better scaling on DPI settings other than 96,
-- minor fixes
+Changelog (v.0.3.4.0):
+- improved handling of network errors
 
 System requirements:
 
