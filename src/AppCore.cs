@@ -15,11 +15,20 @@ namespace furdown
         public static AppCore Core;
 
         #region console management
+        #if !furdown_portable_core
         [DllImport("kernel32.dll")]
         public static extern bool AllocConsole();
 
         [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport("kernel32.dll")]
         public static extern bool FreeConsole();
+
+        IntPtr currentConsoleHandle;
+        #else
+        IntPtr currentConsoleHandle = 0;
+        #endif
         #endregion
 
         #region HTTP-related members
@@ -82,8 +91,12 @@ namespace furdown
 
         public AppCore()
         {
-            // show the console window
+            // show the console window, and get its handle
+            #if !furdown_portable_core
             AllocConsole();
+            currentConsoleHandle = GetConsoleWindow();
+            #endif
+
             // welcome thing
             Console.WriteLine(@"furdown " + Assembly.GetEntryAssembly().GetName().Version);
             Console.WriteLine(@"<crouvpony47.itch.io> <github.com/crouvpony47>");
@@ -99,7 +112,9 @@ namespace furdown
         /// </summary>
         public void OnAppTerminate()
         {
+            #if !furdown_portable_core
             FreeConsole();
+            #endif
         }
 
         /// <summary>
@@ -153,6 +168,7 @@ namespace furdown
         public async Task<List<string>> CreateSubmissionsListFromGallery(string gallery)
         {
             Console.WriteLine("Building submissions list for " + gallery);
+            TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.Indeterminate);
             List<string> lst = new List<string>();
             int page = 0;
             while (true)
@@ -167,12 +183,12 @@ namespace furdown
                 beforeawait:
                 try
                 {
-                    Console.WriteLine("GET await: " + pageUrl);
+                    Console.WriteLine("Getting page: " + pageUrl);
                     cpage = await http.GetStringAsync(pageUrl);
                 }
                 catch (Exception E)
                 {
-                    Console.WriteLine("GET error (" + pageUrl + "): " + E.Message);
+                    Console.WriteLine("GET request error (" + pageUrl + "): " + E.Message);
                     attempts--;
                     System.Threading.Thread.Sleep(2000);
                     if (attempts > 0)
@@ -194,6 +210,7 @@ namespace furdown
                     break;
                 }
             }
+            TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.NoProgress);
             return lst;
         }
 
@@ -243,12 +260,12 @@ namespace furdown
                 beforeawait:
                 try
                 {
-                    Console.WriteLine("GET await: " + subUrl);
+                    Console.WriteLine("Getting page: " + subUrl);
                     cpage = await http.GetStringAsync(subUrl);
                 }
                 catch (Exception E)
                 {
-                    Console.WriteLine("GET error (" + subUrl + "): " + E.Message);
+                    Console.WriteLine("GET request error (" + subUrl + "): " + E.Message);
                     attempts--;
                     System.Threading.Thread.Sleep(2000);
                     if (attempts > 0)
@@ -362,7 +379,7 @@ namespace furdown
                 fbeforeawait:
                 try
                 {
-                    Console.WriteLine("GET await: " + sp.URL);
+                    Console.WriteLine("Downloading: " + sp.URL);
                     using (
                         Stream contentStream = await (
                             await http.GetAsync(sp.URL, HttpCompletionOption.ResponseHeadersRead)
@@ -406,6 +423,7 @@ namespace furdown
                     }
                 }
                 Console.WriteLine("Done: #" + subId);
+                TaskbarProgress.SetValue(currentConsoleHandle, subs.Count - i, subs.Count);
                 res.processedPerfectly++;
             }
             // writing results
@@ -423,9 +441,10 @@ namespace furdown
             }
             // save DB
             SubmissionsDB.Save();
+            // stop progress indicating
+            TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.NoProgress);
             // return result, actually
             return res;
         }
-
     }
 }

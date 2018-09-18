@@ -10,8 +10,9 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-Changelog (v.0.3.4.0):
-- improved handling of network errors
+Changelog (v.0.3.5.0):
+- download progress indication in taskbar (Win7+)
+- minor fixes
 
 System requirements:
 

@@ -123,7 +123,7 @@ namespace furdown
 
         private void galleryUrlBox_Leave(object sender, EventArgs e)
         {
-            if (galleryUrlBox.Text.Last() == '/')
+            if (galleryUrlBox.Text != "" && galleryUrlBox.Text.Last() == '/')
                 galleryUrlBox.Text = galleryUrlBox.Text.Substring(0, galleryUrlBox.Text.Length - 1);
         }
 
