@@ -69,7 +69,7 @@ namespace furdown
             {
                 var pr = await AppCore.Core.ProcessGenericUrl(link, galleryDescrCheckBox.Checked);
                 string msg = "Downloaded {0} files.";
-                if (pr.failedToDownload.Count > 0 || pr.failedToDownload.Count > 0)
+                if (pr.failedToDownload.Count > 0 || pr.failedToGetPage.Count > 0)
                     msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";
                 Show();
                 MessageBox.Show(msg.Replace("{0}", pr.processedPerfectly.ToString()));
@@ -131,7 +131,7 @@ namespace furdown
             List<string> subs = new List<string>(submUrlsTextBox.Lines);
             var pr = await AppCore.Core.ProcessSubmissionsList(subs, submUrlsDescrCheckBox.Checked);
             string msg = "Downloaded {0} files.";
-            if (pr.failedToDownload.Count > 0 || pr.failedToDownload.Count > 0)
+            if (pr.failedToDownload.Count > 0 || pr.failedToGetPage.Count > 0)
                 msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";
             Show();
             MessageBox.Show(msg.Replace("{0}", pr.processedPerfectly.ToString()));

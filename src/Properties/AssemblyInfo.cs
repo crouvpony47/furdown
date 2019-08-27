@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("crouvpony47")]
 [assembly: AssemblyProduct("furdown")]
-[assembly: AssemblyCopyright("Copyright © 2017-2018, crouvpony47")]
+[assembly: AssemblyCopyright("Copyright © 2017-2019, crouvpony47")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("8b45577e-b5d1-4056-96e6-b2647e18b867")]
 
-[assembly: AssemblyVersion("0.3.5.9")]
-[assembly: AssemblyFileVersion("0.3.5.9")]
+[assembly: AssemblyVersion("0.3.6.0")]
+[assembly: AssemblyFileVersion("0.3.6.0")]
 [assembly: NeutralResourcesLanguage("en")]
 

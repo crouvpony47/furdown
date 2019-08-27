@@ -21,6 +21,11 @@ namespace furdown
             var args = Environment.GetCommandLineArgs();
             if (args.Count() < 2 || args[1] != "-b")
             {
+                if (args.Count() >= 2)
+                {
+                    Console.WriteLine("Note: found some invalid command line arguments");
+                    Console.WriteLine("For CLI usage notes run this app with -b -help");
+                }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 WebBrowserEmulationSet();
@@ -52,6 +57,7 @@ namespace furdown
                     @"SOFTWARE\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION", true)
                 )
                 {
+					if (rk == null) return;
                     string appname = System.IO.Path.GetFileName(Application.ExecutablePath);
                     dynamic value = rk.GetValue(appname);
                     if (value == null)

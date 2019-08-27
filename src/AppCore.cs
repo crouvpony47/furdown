@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace furdown
 {
@@ -24,10 +25,10 @@ namespace furdown
 
         [DllImport("kernel32.dll")]
         public static extern bool FreeConsole();
-
+        
         IntPtr currentConsoleHandle;
         #else
-        IntPtr currentConsoleHandle = 0;
+		IntPtr currentConsoleHandle = (IntPtr)0;
         #endif
         #endregion
 
@@ -236,7 +237,7 @@ namespace furdown
             {
                 string subId = subs[i];
                 // don't care about empty strings
-                if (subId == null || subId.CompareTo("") == 0) continue;
+				if (string.IsNullOrEmpty(subId)) continue;
                 Console.WriteLine("> Processing submission #" + subId);
                 // check if in DB already
                 try
@@ -301,6 +302,14 @@ namespace furdown
                     );
                     cpage = cpage.Replace("href=\"/", "href=\"https://furaffinity.net/");
                     cpage = cpage.Replace("src=\"//", "src=\"https://");
+                    // replace relative date with the absolute one
+                    var match = Regex.Match(cpage, "title=\"(.+?)\" class=\"popup_date\">(.+?)<", RegexOptions.CultureInvariant);
+                    if (match.Success)
+                    {
+                        string matchVal = match.Value;
+                        string matchValNew = matchVal.Replace(match.Groups[2].Value, match.Groups[1].Value);
+                        cpage = cpage.Replace(matchVal, matchValNew);
+                    }
                 }
                 sp.ARTIST = sp.URL.Substring(sp.URL.LastIndexOf(@"/art/") + 5);
                 sp.ARTIST = sp.ARTIST.Substring(0, sp.ARTIST.IndexOf('/'));
