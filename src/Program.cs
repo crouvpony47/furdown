@@ -17,10 +17,25 @@ namespace furdown
             AppCore.Core = new AppCore();
             SubmissionsDB.DB = new SubmissionsDB();
             GlobalSettings.GlobalSettingsInit();
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            WebBrowserEmulationSet();
-            Application.Run(new authForm());
+
+            var args = Environment.GetCommandLineArgs();
+            if (args.Count() < 2 || args[1] != "-b")
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                WebBrowserEmulationSet();
+                Application.Run(new authForm());
+            }
+            else
+            {
+                bool AuthRes = AppCore.Core.Init().Result;
+                if (!AuthRes)
+                {
+                    Console.WriteLine("Not authorized! Log in at least once using GUI first.");
+                    return;
+                }
+                CommandLineInterface.Execute(args).Wait();
+            }
             AppCore.Core.OnAppTerminate();
         }
 

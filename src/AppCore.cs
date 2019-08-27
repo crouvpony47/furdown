@@ -446,5 +446,57 @@ namespace furdown
             // return result, actually
             return res;
         }
+        
+        public async Task<ProcessingResults> ProcessGenericUrl(string link, bool needDesciption)
+        {
+            List<string> subs = new List<string>();
+            if (link.Length > 0 && link[0] == '$')
+            {
+                // load URLs list from a file
+                string listFile = link.Substring(1);
+                if (!File.Exists(listFile))
+                {
+                    throw new Exception ("Referenced links list file seems unreachable.");
+                }
+                try
+                {
+                    string[] urls = File.ReadAllLines(listFile);
+                    foreach (string url in urls)
+                    {
+                        string urlFixed = url.TrimEnd(" /".ToCharArray()); // not expecting C# 7.3+ compiler, so can't just assign to "url"
+                        if (urlFixed.Length > 0)
+                        {
+                            List<string> subListFromUrl = null;
+                            subListFromUrl = await CreateSubmissionsListFromGallery(urlFixed);
+                            if (subListFromUrl != null) subs.AddRange(subListFromUrl);
+                        }
+                    }
+                }
+                catch (Exception E)
+                {
+                    throw new Exception("Error: " + Environment.NewLine + E.Message);
+                }
+            }
+            else
+            {
+                // single URL, http(s)
+                List<string> subListFromUrl = null;
+                subListFromUrl = await CreateSubmissionsListFromGallery(link);
+                if (subListFromUrl != null) subs.AddRange(subListFromUrl);
+            }
+            // save submissions list
+            try
+            {
+                Console.WriteLine("Saving submissions list...");
+                File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "latest_subs.log"), subs);
+                Console.WriteLine("Submissions list saved to \"latest_subs.log\"");
+            }
+            catch (Exception E)
+            {
+                Console.WriteLine("Failed to save submissions list: " + E.Message);
+            }
+            // save images/descriptions etc.
+            return await ProcessSubmissionsList(subs, needDesciption);
+        }
     }
 }

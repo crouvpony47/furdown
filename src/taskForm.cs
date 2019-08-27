@@ -64,61 +64,22 @@ namespace furdown
         private async void galleryDownloadBtn_Click(object sender, EventArgs e)
         {
             Hide();
-            // first, make a list of submissions
-            List<string> subs = new List<string>();
             string link = galleryUrlBox.Text;
-            if (link.Length > 0 && link[0] == '$')
-            {
-                // load URLs list from a file
-                string listFile = link.Substring(1);
-                if (!File.Exists(listFile))
-                {
-                    Show(); MessageBox.Show("Referenced links list file seems unreachable."); return;
-                }
-                try
-                {
-                    string[] urls = File.ReadAllLines(listFile);
-                    foreach (string url in urls)
-                    {
-                        string urlFixed = url.TrimEnd(" /".ToCharArray()); // not expecting C# 7.3+ compiler, so can't just assign to "url"
-                        if (urlFixed.Length > 0)
-                        {
-                            List<string> subListFromUrl = null;
-                            subListFromUrl = await AppCore.Core.CreateSubmissionsListFromGallery(urlFixed);
-                            if (subListFromUrl != null) subs.AddRange(subListFromUrl);
-                        }
-                    }
-                }
-                catch (Exception E)
-                {
-                    Show(); MessageBox.Show("Error: " + Environment.NewLine + E.Message); return;
-                }
-            }
-            else
-            {
-                // single URL, http(s)
-                List<string> subListFromUrl = null;
-                subListFromUrl = await AppCore.Core.CreateSubmissionsListFromGallery(link);
-                if (subListFromUrl != null) subs.AddRange(subListFromUrl);
-            }
-            // save submissions list
             try
             {
-                Console.WriteLine("Saving submissions list...");
-                File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "latest_subs.log"), subs);
-                Console.WriteLine("Submissions list saved to \"latest_subs.log\"");
+                var pr = await AppCore.Core.ProcessGenericUrl(link, galleryDescrCheckBox.Checked);
+                string msg = "Downloaded {0} files.";
+                if (pr.failedToDownload.Count > 0 || pr.failedToDownload.Count > 0)
+                    msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";
+                Show();
+                MessageBox.Show(msg.Replace("{0}", pr.processedPerfectly.ToString()));
             }
-            catch (Exception E)
+            catch (Exception ex)
             {
-                Console.WriteLine("Failed to save submissions list: " + E.Message);
+                Show();
+                MessageBox.Show(ex.Message);
+                return;
             }
-            // save images/descriptions etc.
-            var pr = await AppCore.Core.ProcessSubmissionsList(subs, galleryDescrCheckBox.Checked);
-            string msg = "Downloaded {0} files.";
-            if (pr.failedToDownload.Count > 0 || pr.failedToDownload.Count > 0)
-                msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";
-            Show();
-            MessageBox.Show(msg.Replace("{0}",pr.processedPerfectly.ToString()));
         }
 
         private void galleryUrlBox_Leave(object sender, EventArgs e)
