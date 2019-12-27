@@ -5,10 +5,9 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.3.6.0)
-- added batch/CLI mode;
-- now replacing relative dates in the descriptions with the absolute ones;
-- minor fixes
+### Changelog (v.0.3.7.0)
+- added naming templates for submission title and publication date
+- true portable more with no traces is AppData (to activate, put an initially empty file called `furdown-portable.conf` in the working directory; it is assumed to be writable)
 
 ### System requirements
 - Windows Vista SP2 or newer, might not work on server editions
