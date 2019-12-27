@@ -87,6 +87,7 @@
     <Compile Include="taskForm.Designer.cs">
       <DependentUpon>taskForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils.cs" />
     <EmbeddedResource Include="authForm.resx">
       <DependentUpon>authForm.cs</DependentUpon>
     </EmbeddedResource>

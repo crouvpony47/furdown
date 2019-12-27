@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace furdown
 {
@@ -255,6 +256,7 @@ namespace furdown
                     continue;
                 }
                 string subUrl = "https://www.furaffinity.net/view/" + subId;
+
                 // get submission page
                 int attempts = 3;
                 string cpage = "";
@@ -278,6 +280,7 @@ namespace furdown
                         continue;
                     }
                 }
+
                 // process submission page
                 string downbtnkey = "<a href=\"//d.facdn.net/";
                 string desckey = "<div class=\"submission-description-container";
@@ -294,27 +297,68 @@ namespace furdown
                 cpage = cpage.Substring(cpage.IndexOf("/", StringComparison.Ordinal));
                 sp.URL = "https:"
                     + cpage.Substring(0, cpage.IndexOf("\"", StringComparison.Ordinal));
-                if (needDescription) {
-                    cpage = cpage.Substring(cpage.IndexOf(desckey, StringComparison.Ordinal));
-                    string desckeyend = "</div>";
+
+				// processing submission description; also extracts submission date and title
+				{
+					Utils.FillPropertiesFromDateTime(DateTime.Now, sp); // set Now as a fallback date
+					sp.TITLE = "Unknown"; // fallback title
+                    
+                    // extract description
+					cpage = cpage.Substring(cpage.IndexOf(desckey, StringComparison.Ordinal));
+                    const string desckeyend = "</div>";
                     cpage = cpage.Substring(0,
-                        cpage.IndexOf(desckeyend, cpage.IndexOf(desckeyend) + 1) + desckeyend.Length
+					                        cpage.IndexOf(desckeyend, cpage.IndexOf(desckeyend, StringComparison.Ordinal) + 1,
+					                                      StringComparison.Ordinal) + desckeyend.Length
                     );
                     cpage = cpage.Replace("href=\"/", "href=\"https://furaffinity.net/");
                     cpage = cpage.Replace("src=\"//", "src=\"https://");
+
                     // replace relative date with the absolute one
-                    var match = Regex.Match(cpage, "title=\"(.+?)\" class=\"popup_date\">(.+?)<", RegexOptions.CultureInvariant);
-                    if (match.Success)
-                    {
-                        string matchVal = match.Value;
-                        string matchValNew = matchVal.Replace(match.Groups[2].Value, match.Groups[1].Value);
-                        cpage = cpage.Replace(matchVal, matchValNew);
-                    }
+					var dateMatch = Regex.Match(cpage, "title=\"(.+?)\" class=\"popup_date\">(.+?)<", RegexOptions.CultureInvariant);
+					if (dateMatch.Success)
+					{
+						string dateMatchVal = dateMatch.Value;
+						string dateTimeStr = dateMatch.Groups[1].Value; // fixed format date
+
+						// replace relative date with a fixed format one
+						string dateMatchValNew = dateMatchVal.Replace(dateMatch.Groups[2].Value, dateTimeStr);
+						cpage = cpage.Replace(dateMatchVal, dateMatchValNew);
+
+						// parse date 
+						var dateTimeInternalMatch = Regex.Match(dateTimeStr, @"\d([^\d].+?,)", RegexOptions.CultureInvariant);
+						if (dateTimeInternalMatch.Success)
+						{
+							string matchVal = dateTimeInternalMatch.Value;
+							string matchValNew = matchVal.Replace(dateTimeInternalMatch.Groups[1].Value, "");
+							dateTimeStr = dateTimeStr.Replace(matchVal, matchValNew);
+							const string dateFormat = "MMM d yyyy hh:mm tt";
+							try
+							{
+								DateTime dateTime = DateTime.ParseExact(dateTimeStr, dateFormat, CultureInfo.InvariantCulture);
+								Utils.FillPropertiesFromDateTime(dateTime, sp);
+							}
+							catch (Exception e)
+							{
+								Console.WriteLine("Warning :: cannot parse date :: " + e.Message);
+							}
+						}
+					}
+					else Console.WriteLine("Warning :: unable to extact submission date");
+
+                    // get the title
+					var titleMatch = Regex.Match(cpage, "<h2.+?submission-title-header.+?>(.+?)<", RegexOptions.CultureInvariant);
+					if (titleMatch.Success)
+					{
+						sp.TITLE = Utils.StripIllegalFilenameChars(titleMatch.Groups[1].Value);
+						Console.WriteLine("Title: " + sp.TITLE);
+					}
+					else Console.WriteLine("Warning :: unable to extact submission title");
                 }
+
                 sp.ARTIST = sp.URL.Substring(sp.URL.LastIndexOf(@"/art/") + 5);
                 sp.ARTIST = sp.ARTIST.Substring(0, sp.ARTIST.IndexOf('/'));
                 sp.FILEFULL = sp.URL.Substring(sp.URL.LastIndexOf('/') + 1);
-                sp.FILEFULL = string.Concat(sp.FILEFULL.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+				sp.FILEFULL = Utils.StripIllegalFilenameChars(sp.FILEFULL);
                 sp.FILEID = sp.FILEFULL.Substring(0, sp.FILEFULL.IndexOf('.'));
                 if (sp.FILEFULL.IndexOf('_') >= 0) // valid filename (some names on FA are corrupted and contain nothing but '.' after ID)
                 {
@@ -335,6 +379,7 @@ namespace furdown
                     sp.FILEPART = @"unknown.jpg";
                     sp.EXT = @"jpg";
                 }
+
                 // apply template(s)
                 string fname = GlobalSettings.Settings.filenameTemplate;
                 string dfname = GlobalSettings.Settings.descrFilenameTemplate;
@@ -349,6 +394,7 @@ namespace furdown
                         dfname = dfname.Replace("%" + fi.Name + "%", (string)fi.GetValue(sp));
                     }
                 }
+
                 // make sure directories exist
                 string fnamefull = Path.Combine(GlobalSettings.Settings.downloadPath, fname);
                 string dfnamefull = Path.Combine(GlobalSettings.Settings.downloadPath, dfname);
@@ -362,6 +408,7 @@ namespace furdown
                     Console.WriteLine("Failed to make sure target directories do exist.");
                     break;
                 }
+
                 // save description
                 if (needDescription)
                 {
@@ -376,6 +423,7 @@ namespace furdown
                     }
                     
                 }
+
                 // download file
                 Console.WriteLine("target filename: " + fname);
                 if (File.Exists(fnamefull))
@@ -435,6 +483,7 @@ namespace furdown
                 TaskbarProgress.SetValue(currentConsoleHandle, subs.Count - i, subs.Count);
                 res.processedPerfectly++;
             }
+
             // writing results
             try
             {

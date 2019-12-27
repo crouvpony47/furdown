@@ -32,6 +32,11 @@ namespace furdown
             Settings = new GlobalSettings();
             appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             settingsFN = Path.Combine(appDataPath, "furdown\\furdown.conf");
+            // true portable mode
+			if (File.Exists("./furdown-portable.conf"))
+			{
+				settingsFN = "./furdown-portable.conf";
+			}
             // if settings file exists, load it
             bool needToSetDefaults = false;
             if (File.Exists(settingsFN))

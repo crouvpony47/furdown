@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace furdown
 {
@@ -15,5 +11,13 @@ namespace furdown
         public string FILEFULL;
         public string FILEPART;
         public string EXT;
+
+		public string TITLE;
+
+		public string PDYEAR;
+		public string PDMON;
+		public string PDDAY;
+		public string PDHOUR;
+		public string PDMIN;
     }
 }
