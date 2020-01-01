@@ -5,8 +5,9 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.4.0.0)
-- adapt to the FA template changes
+### Changelog (v.0.4.1.0)
+- adapt to the FA template changes (fix date parsing when not using "fuzzy date format")
+- checking for updates
 
 ### System requirements
 - Windows Vista SP2 or newer, might not work on server editions

@@ -107,6 +107,9 @@ namespace furdown
             httph.UseCookies = false; // disable internal cookies handling to help with import
             http = new HttpClient(httph);
             http.DefaultRequestHeaders.Clear();
+
+            System.Net.ServicePointManager.SecurityProtocol = 
+                System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls;
         }
 
         /// <summary>
@@ -283,7 +286,6 @@ namespace furdown
 
                 // process submission page
                 string downbtnkey = "<a href=\"//d.facdn.net/";
-                string desckey = "<div class=\"submission-description-container";
                 SubmissionProps sp = new SubmissionProps();
                 sp.SUBMID = subId;
                 int keypos = cpage.IndexOf(downbtnkey, StringComparison.Ordinal);
@@ -325,9 +327,18 @@ namespace furdown
 					{
 						string dateMatchVal = dateMatch.Value;
 						string dateTimeStr = dateMatch.Groups[1].Value; // fixed format date
-
+                        string dateTimeStrFuzzy = dateMatch.Groups[2].Value;
+                        
+                        // depending on user settings, fuzzy and fixed times may be swapped
+                        if (dateTimeStrFuzzy.Contains(" PM") || dateTimeStrFuzzy.Contains(" AM"))
+                        {
+                            var temporary = dateTimeStr;
+                            dateTimeStr = dateTimeStrFuzzy;
+                            dateTimeStrFuzzy = temporary;
+                        }
+                        
                         // replace relative date with a fixed format one
-                        sub_date_strong = dateMatchVal.Replace(dateMatch.Groups[2].Value, dateTimeStr);
+                            sub_date_strong = dateMatchVal.Replace(dateTimeStrFuzzy, dateTimeStr);
 
                         // parse date
                         dateTimeStr = dateTimeStr.Replace(",", "");
@@ -341,6 +352,7 @@ namespace furdown
 							catch (Exception e)
 							{
 								Console.WriteLine("Warning :: cannot parse date :: " + e.Message);
+                                Console.WriteLine("Info :: date string :: " + dateTimeStr);
 							}
 						}
 					}
