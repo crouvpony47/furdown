@@ -302,35 +302,36 @@ namespace furdown
 				{
 					Utils.FillPropertiesFromDateTime(DateTime.Now, sp); // set Now as a fallback date
 					sp.TITLE = "Unknown"; // fallback title
-                    
-                    // extract description
-					cpage = cpage.Substring(cpage.IndexOf(desckey, StringComparison.Ordinal));
-                    const string desckeyend = "</div>";
-                    cpage = cpage.Substring(0,
-					                        cpage.IndexOf(desckeyend, cpage.IndexOf(desckeyend, StringComparison.Ordinal) + 1,
-					                                      StringComparison.Ordinal) + desckeyend.Length
-                    );
-                    cpage = cpage.Replace("href=\"/", "href=\"https://furaffinity.net/");
-                    cpage = cpage.Replace("src=\"//", "src=\"https://");
+
+                    // title
+                    const string key_title = @"<div class=""submission-title"">";
+                    const string key_enddiv = "</div>";
+                    cpage = cpage.Substring(cpage.IndexOf(key_title, StringComparison.Ordinal));
+                    string sub_title_div = cpage.Substring(0,
+                                                           cpage.IndexOf(key_enddiv, cpage.IndexOf(key_enddiv, StringComparison.Ordinal) + 1,
+                                                                         StringComparison.Ordinal) + key_enddiv.Length);
+                    var titleMatch = Regex.Match(sub_title_div, "<h2><p>(.+?)</p></h2>", RegexOptions.CultureInvariant);
+                    if (titleMatch.Success)
+                    {
+                        sp.TITLE = Utils.StripIllegalFilenameChars(titleMatch.Groups[1].Value);
+                        Console.WriteLine("Title: " + sp.TITLE);
+                    }
+                    else Console.WriteLine("Warning :: no submission title found!");
 
                     // replace relative date with the absolute one
-					var dateMatch = Regex.Match(cpage, "title=\"(.+?)\" class=\"popup_date\">(.+?)<", RegexOptions.CultureInvariant);
+                    string sub_date_strong = "";
+                    var dateMatch = Regex.Match(cpage, "<strong.+?title=\"(.+?)\" class=\"popup_date\">(.+?)<.+?</strong>", RegexOptions.CultureInvariant);
 					if (dateMatch.Success)
 					{
 						string dateMatchVal = dateMatch.Value;
 						string dateTimeStr = dateMatch.Groups[1].Value; // fixed format date
 
-						// replace relative date with a fixed format one
-						string dateMatchValNew = dateMatchVal.Replace(dateMatch.Groups[2].Value, dateTimeStr);
-						cpage = cpage.Replace(dateMatchVal, dateMatchValNew);
+                        // replace relative date with a fixed format one
+                        sub_date_strong = dateMatchVal.Replace(dateMatch.Groups[2].Value, dateTimeStr);
 
-						// parse date 
-						var dateTimeInternalMatch = Regex.Match(dateTimeStr, @"\d([^\d].+?,)", RegexOptions.CultureInvariant);
-						if (dateTimeInternalMatch.Success)
-						{
-							string matchVal = dateTimeInternalMatch.Value;
-							string matchValNew = matchVal.Replace(dateTimeInternalMatch.Groups[1].Value, "");
-							dateTimeStr = dateTimeStr.Replace(matchVal, matchValNew);
+                        // parse date
+                        dateTimeStr = dateTimeStr.Replace(",", "");
+                        {
 							const string dateFormat = "MMM d yyyy hh:mm tt";
 							try
 							{
@@ -345,14 +346,20 @@ namespace furdown
 					}
 					else Console.WriteLine("Warning :: unable to extact submission date");
 
-                    // get the title
-					var titleMatch = Regex.Match(cpage, "<h2.+?submission-title-header.+?>(.+?)<", RegexOptions.CultureInvariant);
-					if (titleMatch.Success)
-					{
-						sp.TITLE = Utils.StripIllegalFilenameChars(titleMatch.Groups[1].Value);
-						Console.WriteLine("Title: " + sp.TITLE);
-					}
-					else Console.WriteLine("Warning :: unable to extact submission title");
+                    // extract description
+                    const string key_desc = @"<div class=""submission-description"">";
+                    cpage = cpage.Substring(cpage.IndexOf(key_desc, StringComparison.Ordinal));
+                    cpage = cpage.Substring(0,
+                                            cpage.IndexOf(key_enddiv, cpage.IndexOf(key_enddiv, StringComparison.Ordinal) + 1,
+                                                          StringComparison.Ordinal) + key_enddiv.Length);
+                    cpage = cpage.Replace("href=\"/", "href=\"https://furaffinity.net/");
+                    cpage = cpage.Replace("src=\"//", "src=\"https://");
+
+                    cpage = @"<div class=""submission-description-container link-override"">
+                        <div class=""submission-title"">
+                            <h2 class=""submission-title-header"">{{{title}}}</h2>
+                            Posted {{{date}}}
+                        </div><hr>".Replace("{{{title}}}", sp.TITLE).Replace("{{{date}}}", sub_date_strong) + cpage;
                 }
 
                 sp.ARTIST = sp.URL.Substring(sp.URL.LastIndexOf(@"/art/") + 5);

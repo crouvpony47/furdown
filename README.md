@@ -5,14 +5,17 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.3.7.0)
-- added naming templates for submission title and publication date
-- true portable more with no traces is AppData (to activate, put an initially empty file called `furdown-portable.conf` in the working directory; it is assumed to be writable)
+### Changelog (v.0.4.0.0)
+- adapt to the FA template changes
 
 ### System requirements
 - Windows Vista SP2 or newer, might not work on server editions
 - .NET 4.5
 - *Having IE11 installed is strongly recommended for better login experience*
+
+### Portable mode
+
+To leave no traces in ApplicationData directory you can create an empty file called `furdown-portable.conf` in the working directory, it will then be used as a settings storage file instead of the default `%AppData%\furdown\furdown.conf`.
 
 ### Batch/CLI mode
 v.0.3.6 has a basic support for being run within a batch script, or from a terminal.
