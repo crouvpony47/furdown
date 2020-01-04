@@ -1,13 +1,13 @@
 # furdown
 Yet another mass downloader for FurAffinity.net.
 
-**Note**: only works with new/beta theme.
+**Note**: only works with the new (Modern) theme.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.4.1.0)
-- adapt to the FA template changes (fix date parsing when not using "fuzzy date format")
-- checking for updates
+### Changelog (v.0.4.2.0)
+- adapt to the new favorites URL pattern
+- minor tweaks
 
 ### System requirements
 - Windows Vista SP2 or newer, might not work on server editions
@@ -65,3 +65,5 @@ __*__ As templates use the syntax much like that used for environment variables,
 - `furdown.exe -b -g https://www.furaffinity.net/gallery/flipstick`
 - `furdown.exe -b -d -dbi -f "Z:\Saved Galleries\list.txt" -o "Z:\Saved Galleries\"`
 - `furdown.exe -b -d -g https://www.furaffinity.net/scraps/flipstick -dt %ARTIST%.s\%SUBMID%.%FILEPART%.dsc.htm -st %ARTIST%.s\%SUBMID%.%FILEPART%`
+
+Note that `%` might need to be escaped as `%%` in batch scripts.

@@ -101,7 +101,7 @@ namespace furdown
 
             // welcome thing
             Console.WriteLine(@"furdown " + Assembly.GetEntryAssembly().GetName().Version);
-            Console.WriteLine(@"<crouvpony47.itch.io> <github.com/crouvpony47>");
+            Console.WriteLine(@"<github.com/crouvpony47> <crouvpony47.itch.io>");
             // initialize http client
             httph = new HttpClientHandler();
             httph.UseCookies = false; // disable internal cookies handling to help with import
@@ -131,7 +131,8 @@ namespace furdown
             Console.WriteLine("Checking authorization...");
             string cookies = GetGlobalCookies("https://www.furaffinity.net/");
             if (cookies == null) return false;
-            Console.WriteLine("Found cookies: "+cookies);
+            Console.WriteLine("Found some cookies.");
+            // Console.WriteLine("Found cookies: "+cookies);
             try
             {
                 http.DefaultRequestHeaders.Clear();
@@ -176,10 +177,15 @@ namespace furdown
             TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.Indeterminate);
             List<string> lst = new List<string>();
             int page = 0;
+            long favNextId = -1;
             while (true)
             {
                 page++;
-                string pageUrl = gallery + "/" + page.ToString();
+                string pageUrl = gallery + ((page == 1 ) ? "/" : ("/" + page.ToString()));
+                if (favNextId >= 0)
+                {
+                    pageUrl = gallery + "/" + favNextId.ToString() + "/next";
+                }
                 string key = "figure id=\"sid-";
                 string endkey = "\"";
                 // get page listing submissions
@@ -213,6 +219,23 @@ namespace furdown
                 {
                     Console.WriteLine("Reached an empty page. Total elements found: " + lst.Count.ToString());
                     break;
+                }
+                if (pageUrl.Contains("/favorites/"))
+                {
+                    var nextMatch = Regex.Match(cpage, @"href=""/favorites/.+?/(.+?)/next"">Next<", RegexOptions.CultureInvariant);
+                    if (nextMatch.Success)
+                    {
+                        if (!long.TryParse(nextMatch.Groups[1].Value, out favNextId))
+                        {
+                            Console.WriteLine("Warning :: can't get the next page URL");
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Last page reached.");
+                        break;
+                    }
                 }
             }
             TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.NoProgress);
