@@ -382,7 +382,7 @@ namespace furdown
 					else Console.WriteLine("Warning :: unable to extact submission date");
 
                     // extract description
-                    const string key_desc = @"<div class=""submission-description"">";
+                    const string key_desc = @"<div class=""submission-description user-submitted-links"">";
                     cpage = cpage.Substring(cpage.IndexOf(key_desc, StringComparison.Ordinal));
                     cpage = cpage.Substring(0,
                                             cpage.IndexOf(key_enddiv, cpage.IndexOf(key_enddiv, StringComparison.Ordinal) + 1,
