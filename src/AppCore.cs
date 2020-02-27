@@ -104,6 +104,7 @@ namespace furdown
             Console.WriteLine(@"<github.com/crouvpony47> <crouvpony47.itch.io>");
             // initialize http client
             httph = new HttpClientHandler();
+            httph.AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate;
             httph.UseCookies = false; // disable internal cookies handling to help with import
             http = new HttpClient(httph);
             http.DefaultRequestHeaders.Clear();
@@ -136,6 +137,12 @@ namespace furdown
             try
             {
                 http.DefaultRequestHeaders.Clear();
+                // IE's and HttpClient's UAs MUST match for Cloudflare to recognize us
+                http.DefaultRequestHeaders.Add("User-Agent", Utils.EmbeddedIeUtils.GetKnownUserAgentValue());
+                // test:  "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"
+                //http.DefaultRequestHeaders.Add("Accept-Language", "en-US;q=0.8,en;q=0.5,ja;q=0.3"); // not strictly neccessary
+                http.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+                http.DefaultRequestHeaders.Add("Accept", "*/*");
                 http.DefaultRequestHeaders.Add("Cookie", cookies);
                 string cpage = await http.GetStringAsync("https://www.furaffinity.net/");
                 // authorized
@@ -160,13 +167,20 @@ namespace furdown
                 // not authorized
                 else
                 {
-                    Console.WriteLine("Not authorized.");
+                    Console.WriteLine("Not authorized!");
                     return false;
                 }
             }
             // any unaccounted errors
-            catch
+            catch (HttpRequestException e)
             {
+                Console.WriteLine("Error: " + e.Message);
+                Console.WriteLine("If it is caused by Clouflare validation, pass it and navigate to the FA main page.");
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
                 return false;
             };
         }

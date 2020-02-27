@@ -29,6 +29,7 @@ namespace furdown
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 WebBrowserEmulationSet();
+                Utils.EmbeddedIeUtils.SetKnownUserAgent();
                 Application.Run(new authForm());
             }
             else

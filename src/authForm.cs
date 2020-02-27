@@ -35,7 +35,7 @@ namespace furdown
             bool AuthRes = await AppCore.Core.Init();
             if (!AuthRes)
             {
-                Console.WriteLine("Does not seem to be authorized, showing login page");
+                Console.WriteLine("Does not seem to be authorized (or need to pass CF validation)...");
                 authWebBrowser.Navigate("https://www.furaffinity.net/login/");
             }
             else
@@ -46,13 +46,19 @@ namespace furdown
 
         private async void authWebBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
         {
-            // redirected to title page
+            //Console.WriteLine(e.Url.AbsolutePath.ToString());
+            
+            // redirected to the title page
             if (e.Url.AbsolutePath.ToString().CompareTo("/") == 0)
             {
                 bool AuthRes = await AppCore.Core.Init();
                 if (AuthRes)
                 {
                     OnAuthSuccessful();
+                }
+                else
+                {
+                    Console.WriteLine(string.Format("Unsuccessfull login checattempt!"));
                 }
             }
         }

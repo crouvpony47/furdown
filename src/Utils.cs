@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace furdown
 {
@@ -20,5 +21,24 @@ namespace furdown
 				StringSplitOptions.RemoveEmptyEntries
 			));
 		}
+
+        public class EmbeddedIeUtils
+        {
+            [DllImport("urlmon.dll", CharSet = CharSet.Ansi)]
+            private static extern int UrlMkSetSessionOption(int dwOption, string pBuffer, int dwBufferLength, int dwReserved);
+
+            const int URLMON_OPTION_USERAGENT = 0x10000001;
+            const string ua = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
+
+            public static void SetKnownUserAgent()
+            {
+                UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, ua, ua.Length, 0);
+            }
+
+            public static string GetKnownUserAgentValue()
+            {
+                return ua;
+            }
+        }
     }
 }
