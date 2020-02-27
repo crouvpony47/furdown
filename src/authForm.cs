@@ -58,7 +58,7 @@ namespace furdown
                 }
                 else
                 {
-                    Console.WriteLine(string.Format("Unsuccessfull login checattempt!"));
+                    Console.WriteLine(string.Format("Unsuccessfull login attempt!"));
                 }
             }
         }
