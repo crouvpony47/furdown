@@ -146,7 +146,7 @@ namespace furdown
                 http.DefaultRequestHeaders.Add("Cookie", cookies);
                 string cpage = await http.GetStringAsync("https://www.furaffinity.net/");
                 // authorized
-                if (cpage.Contains("\"logout-link\""))
+                if (Regex.Match(cpage, "class=\"[^\"]*logout-link[^\"]*\"", RegexOptions.CultureInvariant).Success)
                 {
                     // and not using classic style
                     if (!cpage.Contains("/themes/classic/"))

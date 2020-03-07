@@ -52,34 +52,13 @@ namespace furdown
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void taskForm_Shown(object sender, EventArgs e)
+        private void taskForm_Shown(object sender, EventArgs e)
         {
             downloadPathBox.Text = GlobalSettings.Settings.downloadPath;
             systemPathBox.Text = GlobalSettings.Settings.systemPath;
             filenameTemplateBox.Text = GlobalSettings.Settings.filenameTemplate;
             descrFilenameBox.Text = GlobalSettings.Settings.descrFilenameTemplate;
             neverDownloadTwiceCheckBox.Checked = GlobalSettings.Settings.downloadOnlyOnce;
-
-            // ceck for updates
-            bool hasUpdates = await UpdatesChecker.CheckRemoteVersion();
-            const string urlToOpen = "https://github.com/crouvpony47/furdown/releases";
-            if (hasUpdates && Visible)
-            {
-                var dlgResult = MessageBox.Show("A newer version of furdown is available, would you like to download it?",
-                                                "Update Available",
-                                                MessageBoxButtons.YesNo);
-                if (dlgResult == DialogResult.Yes)
-                {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(urlToOpen);
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Could not open URL in the default browser:\n" + urlToOpen);
-                    }
-                }
-            }
         }
 
         private async void galleryDownloadBtn_Click(object sender, EventArgs e)

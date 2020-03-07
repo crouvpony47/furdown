@@ -54,6 +54,7 @@ namespace furdown
                         if (c < 0)
                         {
                             Console.WriteLine("Updater :: Note :: an update is available");
+                            Console.WriteLine("Updater :: Note :: see https://github.com/crouvpony47/furdown/releases");
                             return true;
                         }
                         else if (c > 0)

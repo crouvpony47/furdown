@@ -5,8 +5,12 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.4.4.0)
-- bypassing CF's "I'm Under Attack" mode thing. **Note that if you are already logged in but are shown the login form anyway, simply navigate to the FA main page**
+### Changelog (v.0.4.5.0)
+- Adapt to the site template changes
+- Improved updates checker
+
+### A note about CF's "I'm Under Attack" mode
+- If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
 
 ### System requirements
 - Windows Vista SP2 or newer, might not work on server editions

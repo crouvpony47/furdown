@@ -42,6 +42,27 @@ namespace furdown
             {
                 OnAuthSuccessful();
             }
+
+            // check for updates
+            bool hasUpdates = await UpdatesChecker.CheckRemoteVersion();
+            const string urlToOpen = "https://github.com/crouvpony47/furdown/releases";
+            if (hasUpdates && Form.ActiveForm != null && Form.ActiveForm.Visible)
+            {
+                var dlgResult = MessageBox.Show("A newer version of furdown is available, would you like to download it?",
+                                                "Update Available",
+                                                MessageBoxButtons.YesNo);
+                if (dlgResult == DialogResult.Yes)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(urlToOpen);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Could not open URL in the default browser:\n" + urlToOpen);
+                    }
+                }
+            }
         }
 
         private async void authWebBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
