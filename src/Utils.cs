@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace furdown
 {
@@ -21,6 +22,17 @@ namespace furdown
 				StringSplitOptions.RemoveEmptyEntries
 			));
 		}
+
+        public static string FileHash(string path)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = System.IO.File.OpenRead(path))
+                {
+                    return System.Text.Encoding.Default.GetString(md5.ComputeHash(stream));
+                }
+            }
+        }
 
         public class EmbeddedIeUtils
         {

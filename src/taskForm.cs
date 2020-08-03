@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -67,7 +68,7 @@ namespace furdown
             string link = galleryUrlBox.Text;
             try
             {
-                var pr = await AppCore.Core.ProcessGenericUrl(link, galleryDescrCheckBox.Checked);
+                var pr = await AppCore.Core.ProcessGenericUrl(link, galleryDescrCheckBox.Checked, galleryUpdateCheckBox.Checked);
                 string msg = "Downloaded {0} files.";
                 if (pr.failedToDownload.Count > 0 || pr.failedToGetPage.Count > 0)
                     msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";
@@ -166,10 +167,15 @@ namespace furdown
             };
             foreach (string r in toremove)
                 text = text.Replace(r, "");
-            if (!System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9\r\n]+$")
-                && text.CompareTo("") != 0)
+            var lines = text.Split("\r\n".ToCharArray());
+            foreach (var line in lines)
             {
-                return false;
+                if (!string.IsNullOrEmpty(line)
+                    && !Regex.IsMatch(line, @"^[0-9]+$")
+                    && !Regex.IsMatch(line, @"^[0-9]+#[0-9]+$"))
+                {
+                    return false;
+                }
             }
             return true;
         }

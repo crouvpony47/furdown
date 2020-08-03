@@ -200,8 +200,7 @@ namespace furdown
                 {
                     pageUrl = gallery + "/" + favNextId.ToString() + "/next";
                 }
-                string key = "figure id=\"sid-";
-                string endkey = "\"";
+                const string submIdAndFidRegex = @"figure id=""sid-(.+?)"".+?@.+?-(.+?)[.""]"; // group 1: subm id, group 2: file id
                 // get page listing submissions
                 int attempts = 3;
                 string cpage = "";
@@ -223,17 +222,35 @@ namespace furdown
                 }
                 // find submissions in the page
                 int counter = 0;
-                while (cpage.Contains(key))
+                do
                 {
-                    counter++;
-                    cpage = cpage.Substring(cpage.IndexOf(key, StringComparison.Ordinal) + key.Length);
-                    lst.Add(cpage.Substring(0, cpage.IndexOf(endkey, StringComparison.Ordinal)));
-                }
+                    var nextMatch = Regex.Match(cpage, submIdAndFidRegex, RegexOptions.CultureInvariant);
+                    if (nextMatch.Success)
+                    {
+                        uint sid = 0, fid = 0;
+                        if (!uint.TryParse(nextMatch.Groups[1].Value, out sid))
+                        {
+                            Console.WriteLine("Error :: failed to parse a submission ID in the list.");
+                            break;
+                        }
+                        if (!uint.TryParse(nextMatch.Groups[2].Value, out fid))
+                        {
+                            Console.WriteLine(string.Format("Warning :: file ID could not be determined for submission {0}", sid));
+                        }
+                        lst.Add(string.Format("{0}#{1}", sid, fid));
+                        counter++;
+                        string key = nextMatch.Groups[0].Value;
+                        cpage = cpage.Substring(cpage.IndexOf(key, StringComparison.Ordinal) + key.Length);
+                    }
+                    else break;
+                } while (true);
                 if (counter == 0)
                 {
                     Console.WriteLine("Reached an empty page. Total elements found: " + lst.Count.ToString());
                     break;
                 }
+
+                // if we're browsing favs, page numbering scheme is different
                 if (pageUrl.Contains("/favorites/"))
                 {
                     var nextMatch = Regex.Match(cpage, @"href=""/favorites/.+?/(.+?)/next"">Next<", RegexOptions.CultureInvariant);
@@ -269,25 +286,60 @@ namespace furdown
             }
         }
 
-        public async Task<ProcessingResults> ProcessSubmissionsList(List<string> subs, bool needDescription)
+        public async Task<ProcessingResults> ProcessSubmissionsList(List<string> subs, bool needDescription, bool updateMode = false)
         {
             Console.WriteLine("Processing submissions list...");
             ProcessingResults res = new ProcessingResults();
             // iterate over all the submissions in list
             for (int i = subs.Count - 1; i >= 0; i--)
             {
-                string subId = subs[i];
-                // don't care about empty strings
-				if (string.IsNullOrEmpty(subId)) continue;
+                // first, determine submission and file IDs from the string representation (`sid#fid` or `sid`)
+                string subStr = subs[i];
+                string subId;
+                uint subFid = 0;
+                if (string.IsNullOrEmpty(subStr)) continue; // don't care about empty strings
+                var subStrComponents = subStr.Split("#".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                if (subStrComponents.Length == 1)
+                {
+                    subId = subStr;
+                }
+                else if (subStrComponents.Length == 2)
+                {
+                    subId = subStrComponents[0];
+                    uint.TryParse(subStrComponents[1], out subFid);
+                }
+                else
+                {
+                    Console.WriteLine("Error :: Malformed submission ID: " + subStr);
+                    continue;
+                }
+                uint subIdInt = 0;
+                uint.TryParse(subId, out subIdInt);
+                if (subIdInt == 0)
+                {
+                    Console.WriteLine("Warning :: Bad submission index: " + subId);
+                    continue;
+                }
+
                 Console.WriteLine("> Processing submission #" + subId);
+
                 // check if in DB already
                 try
                 {
-                    if (SubmissionsDB.DB.Exists(uint.Parse(subId))
+                    if (SubmissionsDB.DB.Exists(subIdInt)
                         && GlobalSettings.Settings.downloadOnlyOnce)
                     {
-                        Console.WriteLine("Skipped (present in DB)");
-                        continue;
+                        // if we're in the update mode, and the file id in the DB doesn't match the new one
+                        // (or both are missing), we cannot guarantee that we have the right thing
+                        if (!(updateMode && SubmissionsDB.DB.GetFileId(subIdInt) != subFid && subFid != 0))
+                        {
+                            Console.WriteLine("Skipped (present in DB)");
+                            continue;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Submission is present in the DB, but may have been updated; re-checking");
+                        }
                     }
                 }
                 catch
@@ -295,9 +347,9 @@ namespace furdown
                     Console.WriteLine("Unexpected error (DB presence check failed)!");
                     continue;
                 }
-                string subUrl = "https://www.furaffinity.net/view/" + subId;
-
+                
                 // get submission page
+                string subUrl = "https://www.furaffinity.net/view/" + subId;
                 int attempts = 3;
                 string cpage = "";
                 beforeawait:
@@ -411,29 +463,41 @@ namespace furdown
                         </div><hr>".Replace("{{{title}}}", sp.TITLE).Replace("{{{date}}}", sub_date_strong) + cpage;
                 }
 
-                sp.ARTIST = sp.URL.Substring(sp.URL.LastIndexOf(@"/art/") + 5);
-                sp.ARTIST = sp.ARTIST.Substring(0, sp.ARTIST.IndexOf('/'));
-                sp.FILEFULL = sp.URL.Substring(sp.URL.LastIndexOf('/') + 1);
-				sp.FILEFULL = Utils.StripIllegalFilenameChars(sp.FILEFULL);
-                sp.FILEID = sp.FILEFULL.Substring(0, sp.FILEFULL.IndexOf('.'));
-                if (sp.FILEFULL.IndexOf('_') >= 0) // valid filename (some names on FA are corrupted and contain nothing but '.' after ID)
+                const string urlComponentsRegex = @"\/art\/(?<artist>.+?)\/.*?(?<curfid>\d+?)\/(?<fid>.+?)\.(?<fname>.*)$";
+                var urlCompMatch = Regex.Match(sp.URL, urlComponentsRegex);
+                if (urlCompMatch.Success)
                 {
-                    sp.FILEPART = sp.FILEFULL.Substring(sp.FILEFULL.IndexOf('_') + 1);
-                    if (sp.FILEFULL.LastIndexOf('.') >= 0) // has extension
+                    sp.ARTIST = urlCompMatch.Groups["artist"].Value;
+                    sp.CURFILEID = urlCompMatch.Groups["curfid"].Value;
+                    uint.TryParse(sp.CURFILEID, out subFid);
+                    sp.FILEID = urlCompMatch.Groups["fid"].Value;
+                    string filename = urlCompMatch.Groups["fname"].Value;
+                    const string fnameRegex = @"_(.*)\.(.+?)$";
+                    if (string.IsNullOrEmpty(filename) || !filename.Contains("_"))
                     {
-                        sp.EXT = (sp.FILEFULL + " ").Substring(sp.FILEFULL.LastIndexOf('.') + 1).TrimEnd();
-                        if (sp.EXT.CompareTo("") == 0)
-                            sp.EXT = @"jpg";
+                        filename = "";
                     }
-                    else
+                    var fnameMatch = Regex.Match(filename, fnameRegex);
+                    if (!fnameMatch.Success) // completely broken filenames get replaced with "unknown.jpg"
                     {
-                        sp.EXT = @"jpg";
+                        Console.WriteLine("Info :: broken filename detected, replacing with \"unknown.jpg\"");
+                        filename = "_unknown.jpg";
+                        fnameMatch = Regex.Match(filename, fnameRegex);
                     }
+                    sp.FILEPARTNE = fnameMatch.Groups[1].Value;
+                    sp.EXT = fnameMatch.Groups[2].Value;
+                    if (string.IsNullOrEmpty(sp.FILEPARTNE)) // we don't want empty names; replace with "unknown"
+                    {
+                        sp.FILEPARTNE = "unknown";
+                    }
+                    sp.FILEPART = sp.FILEPARTNE + "." + sp.EXT; //v.0.4.x compat
+                    sp.FILEFULL = sp.FILEID + "." + filename;
                 }
                 else
                 {
-                    sp.FILEPART = @"unknown.jpg";
-                    sp.EXT = @"jpg";
+                    Console.WriteLine("Error: could not make sense of the URL for submission " + subId);
+                    res.failedToDownload.Add(subId);
+                    continue;
                 }
 
                 // apply template(s)
@@ -448,6 +512,10 @@ namespace furdown
                     {
                         fname = fname.Replace("%" + fi.Name + "%", (string)fi.GetValue(sp));
                         dfname = dfname.Replace("%" + fi.Name + "%", (string)fi.GetValue(sp));
+#if DEBUG_PRINT_ALL_TEMPLATE_VALS
+                        // debug only: output all template values:
+                        Console.WriteLine(string.Format("+++ {0} = {1}", "%" + fi.Name + "%", (string)fi.GetValue(sp)));
+#endif
                     }
                 }
 
@@ -480,14 +548,49 @@ namespace furdown
                     
                 }
 
-                // download file
                 Console.WriteLine("target filename: " + fname);
-                if (File.Exists(fnamefull))
+
+                // don't need to redownload if file already exists and the submission file ID (current)
+                // in the db matches the one on site
+                bool mayBeUselessDownload = false;
+                string oldFileHash = "";
+                // file exists and we're either not interested in updates, or the version in db matches the one on site
+                if (File.Exists(fnamefull) && (subFid == SubmissionsDB.DB.GetFileId(subIdInt) || !updateMode))
                 {
-                    SubmissionsDB.DB.AddSubmission(uint.Parse(subId));
+                    if (subFid != SubmissionsDB.DB.GetFileId(subIdInt))
+                    {
+                        Console.WriteLine(string.Format(
+                            "Note :: submission {0} could've been updated, consider running this task in update mode", subId
+                            ));
+                    }
+                    SubmissionsDB.DB.AddSubmission(subIdInt);
                     Console.WriteLine("Already exists, continuing~");
                     continue;
                 }
+                if (updateMode)
+                {
+                    if (sp.CURFILEID == sp.FILEID)
+                    {
+                        Console.WriteLine("Note :: this submission has never been updated, just adding the file ID to the DB.");
+                        SubmissionsDB.DB.AddSubmissionWithFileId(subIdInt, subFid);
+                        continue;
+                    }
+                    else if (File.Exists(fnamefull))
+                    {
+                        // versions mismatch
+                        if (SubmissionsDB.DB.GetFileId(subIdInt) == 0)
+                        {
+                            // we have some version, but don't know which (likely a v.0.4.x download)
+                            // download the actual one, but delete if it's the same
+                            mayBeUselessDownload = true;
+                            oldFileHash = Utils.FileHash(fnamefull);
+                        }
+                        fnamefull = Path.Combine(GlobalSettings.Settings.downloadPath,
+                                                 string.Format("{1} [v.{0}.].{2}", subFid, fname, sp.EXT));
+                    }
+                }
+
+                // download file
                 int fattempts = 3;
                 fbeforeawait:
                 try
@@ -505,7 +608,6 @@ namespace furdown
                     {
                         await ReadNetworkStream(contentStream, stream, 5000);
                         // await contentStream.CopyToAsync(stream); // this works, but may hang forever in case of network errors
-                        SubmissionsDB.DB.AddSubmission(uint.Parse(subId));
                     }
                 }
                 catch (Exception E)
@@ -535,6 +637,18 @@ namespace furdown
                         continue;
                     }
                 }
+
+                SubmissionsDB.DB.AddSubmissionWithFileId(subIdInt, subFid);
+                if (mayBeUselessDownload)
+                {
+                    var newFileHash = Utils.FileHash(fnamefull);
+                    if (newFileHash == oldFileHash)
+                    {
+                        Console.WriteLine("Note :: existing version matches the one on the server, removing a duplicate");
+                        File.Delete(fnamefull);
+                    }
+                }
+
                 Console.WriteLine("Done: #" + subId);
                 TaskbarProgress.SetValue(currentConsoleHandle, subs.Count - i, subs.Count);
                 res.processedPerfectly++;
@@ -553,6 +667,7 @@ namespace furdown
             {
                 Console.WriteLine("Failed to save list of subs with issues: " + E.Message);
             }
+
             // save DB
             SubmissionsDB.Save();
             // stop progress indicating
@@ -561,7 +676,7 @@ namespace furdown
             return res;
         }
         
-        public async Task<ProcessingResults> ProcessGenericUrl(string link, bool needDesciption)
+        public async Task<ProcessingResults> ProcessGenericUrl(string link, bool needDesciption, bool updateMode = false)
         {
             List<string> subs = new List<string>();
             if (link.Length > 0 && link[0] == '$')
@@ -610,7 +725,7 @@ namespace furdown
                 Console.WriteLine("Failed to save submissions list: " + E.Message);
             }
             // save images/descriptions etc.
-            return await ProcessSubmissionsList(subs, needDesciption);
+            return await ProcessSubmissionsList(subs, needDesciption, updateMode);
         }
     }
 }
