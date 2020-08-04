@@ -38,6 +38,7 @@
             this.submUrlsDescrCheckBox = new System.Windows.Forms.CheckBox();
             this.submUrlsTextBox = new System.Windows.Forms.TextBox();
             this.galleryGroupBox = new System.Windows.Forms.GroupBox();
+            this.galleryUpdateCheckBox = new System.Windows.Forms.CheckBox();
             this.useLinksListBtn = new System.Windows.Forms.Button();
             this.galleryDescrCheckBox = new System.Windows.Forms.CheckBox();
             this.galleryDownloadBtn = new System.Windows.Forms.Button();
@@ -65,7 +66,7 @@
             this.dbSubmTextBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.galleryUpdateCheckBox = new System.Windows.Forms.CheckBox();
+            this.submUrlsUpdateCheckBox = new System.Windows.Forms.CheckBox();
             this.mainTabControl.SuspendLayout();
             this.tasksTab.SuspendLayout();
             this.submUrlsGroupBox.SuspendLayout();
@@ -106,6 +107,7 @@
             // 
             this.submUrlsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.submUrlsGroupBox.Controls.Add(this.submUrlsUpdateCheckBox);
             this.submUrlsGroupBox.Controls.Add(this.submUrlsDownloadBtn);
             this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadFileBtn);
             this.submUrlsGroupBox.Controls.Add(this.submUrlsLoadPrvBtn);
@@ -199,6 +201,16 @@
             this.galleryGroupBox.TabIndex = 0;
             this.galleryGroupBox.TabStop = false;
             this.galleryGroupBox.Text = "Download gallery, scraps, favorites or a folder";
+            // 
+            // galleryUpdateCheckBox
+            // 
+            this.galleryUpdateCheckBox.AutoSize = true;
+            this.galleryUpdateCheckBox.Location = new System.Drawing.Point(248, 68);
+            this.galleryUpdateCheckBox.Name = "galleryUpdateCheckBox";
+            this.galleryUpdateCheckBox.Size = new System.Drawing.Size(161, 21);
+            this.galleryUpdateCheckBox.TabIndex = 4;
+            this.galleryUpdateCheckBox.Text = "updates check mode";
+            this.galleryUpdateCheckBox.UseVisualStyleBackColor = true;
             // 
             // useLinksListBtn
             // 
@@ -496,15 +508,15 @@
             // 
             this.openFileDialog.Filter = "Text Files (*.txt, *.log)|*.text;*.txt;*.log|All Files|*.*";
             // 
-            // galleryUpdateCheckBox
+            // submUrlsUpdateCheckBox
             // 
-            this.galleryUpdateCheckBox.AutoSize = true;
-            this.galleryUpdateCheckBox.Location = new System.Drawing.Point(248, 68);
-            this.galleryUpdateCheckBox.Name = "galleryUpdateCheckBox";
-            this.galleryUpdateCheckBox.Size = new System.Drawing.Size(161, 21);
-            this.galleryUpdateCheckBox.TabIndex = 4;
-            this.galleryUpdateCheckBox.Text = "updates check mode";
-            this.galleryUpdateCheckBox.UseVisualStyleBackColor = true;
+            this.submUrlsUpdateCheckBox.AutoSize = true;
+            this.submUrlsUpdateCheckBox.Location = new System.Drawing.Point(248, 110);
+            this.submUrlsUpdateCheckBox.Name = "submUrlsUpdateCheckBox";
+            this.submUrlsUpdateCheckBox.Size = new System.Drawing.Size(161, 21);
+            this.submUrlsUpdateCheckBox.TabIndex = 6;
+            this.submUrlsUpdateCheckBox.Text = "updates check mode";
+            this.submUrlsUpdateCheckBox.UseVisualStyleBackColor = true;
             // 
             // taskForm
             // 
@@ -573,5 +585,6 @@
         private System.Windows.Forms.CheckBox neverDownloadTwiceCheckBox;
         private System.Windows.Forms.Button useLinksListBtn;
         private System.Windows.Forms.CheckBox galleryUpdateCheckBox;
+        private System.Windows.Forms.CheckBox submUrlsUpdateCheckBox;
     }
 }

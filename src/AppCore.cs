@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define DEBUG_PRINT_ALL_TEMPLATE_VALS
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -320,6 +322,7 @@ namespace furdown
                     Console.WriteLine("Warning :: Bad submission index: " + subId);
                     continue;
                 }
+                uint dbSubId = SubmissionsDB.DB.GetFileId(subIdInt);
 
                 Console.WriteLine("> Processing submission #" + subId);
 
@@ -331,7 +334,7 @@ namespace furdown
                     {
                         // if we're in the update mode, and the file id in the DB doesn't match the new one
                         // (or both are missing), we cannot guarantee that we have the right thing
-                        if (!(updateMode && SubmissionsDB.DB.GetFileId(subIdInt) != subFid && subFid != 0))
+                        if (!(updateMode && (dbSubId != subFid || dbSubId == 0)))
                         {
                             Console.WriteLine("Skipped (present in DB)");
                             continue;
@@ -586,7 +589,7 @@ namespace furdown
                             oldFileHash = Utils.FileHash(fnamefull);
                         }
                         fnamefull = Path.Combine(GlobalSettings.Settings.downloadPath,
-                                                 string.Format("{1} [v.{0}.].{2}", subFid, fname, sp.EXT));
+                                                 string.Format("{1} [v.{0}].{2}", subFid, fname, sp.EXT));
                     }
                 }
 
