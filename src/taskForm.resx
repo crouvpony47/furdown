@@ -123,24 +123,30 @@
 %TITLE% - submission title
 %PDYEAR%, %PDMON%, %PDDAY% - publication date
 %PDHOUR%, %PDMIN% - publication time
-%FILEID% - file ID
+%FILEID% - file ID (initial, constant)
+%CURFILEID% - file ID (current, changes when content is updated)
 %FILEFULL% - full filename
 %FILEPART% - right part of filename
+%FILEPARTNE% - right part of filename, excluding extension
 %EXT% - extension
 ----------------------------
 For example, for submission
-https://www.furaffinity.net/view/24158730/
-with file
-https://d.facdn.net/art/voxell/1500120447/1500120447.voxell_texell_01.jpg
-%SUBMID% = 24158730
+https://www.furaffinity.net/view/16076336/
+with file https://d.facdn.net/art/voxell/1427061816/1427061575.voxell_voxell_01_small.jpg
+%SUBMID% = 16076336 
 %ARTIST% = voxell
-%TITLE% = Horsin' around
-%PDYEAR%, %PDMON%, %PDDAY% = 2017, 07, 15
-%PDHOUR%, %PDMIN% = 17, 07
-%FILEID% = 1500120447
-%FILEFULL% = 1500120447.voxell_texell_01.jpg
-%FILEPART% = texell_01.jpg
-%EXT% = jpg</value>
+%FILEID% = 1427061575
+%CURFILEID% = 1427061816
+%FILEFULL% = 1427061575.voxell_voxell_01_small.jpg
+%FILEPART% = voxell_01_small.jpg
+%FILEPARTNE% = voxell_01_small
+%EXT% = jpg
+%TITLE% = Jellydolls
+%PDYEAR% = 2015
+%PDMON% = 03
+%PDDAY% = 23
+%PDHOUR% = 00
+%PDMIN% = 59</value>
   </data>
   <metadata name="openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>

@@ -11,6 +11,7 @@ namespace furdown
         public static async Task Execute(string[] args)
         {
             bool needDescriptions = false;
+            bool updateMode = false;
             string url = "";
             for (int i = 1; i < args.Count(); i++)
             {
@@ -37,6 +38,12 @@ namespace furdown
                     // enable description saving
                     case "-d":
                         needDescriptions = true;
+                        continue;
+                    // enable updage mode
+                    case "-update":
+                    case "-upd":
+                    case "-u":
+                        updateMode = true;
                         continue;
                     // custom output path
                     case "-o":
@@ -107,7 +114,7 @@ namespace furdown
 
             try
             {
-                var pr = await AppCore.Core.ProcessGenericUrl(url, needDescriptions);
+                var pr = await AppCore.Core.ProcessGenericUrl(url, needDescriptions, updateMode);
                 string msg = "Downloaded {0} files.";
                 if (pr.failedToDownload.Count > 0 || pr.failedToGetPage.Count > 0)
                     msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";

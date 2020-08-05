@@ -9,6 +9,9 @@ Yet another mass downloader for FurAffinity.net.
 - Adapt to the site template changes
 - Improved updates checker
 
+### Changelog (v.0.4.9.9 beta)
+- New feature: content update detection
+
 ### A note about CF's "I'm Under Attack" mode
 - If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
 
@@ -33,6 +36,10 @@ Download a gallery / scraps / folder located at URL. If URL is prefixed with $, 
 - `-d`
 
 Tells furdown you also want submission descriptions saved as HTML.
+
+- `-u`, `-upd`, `-update` (since 0.4.9.9b)
+
+Check for content updates. This means comparing the file IDs with the ones stored in furdown's internal cache, and downloading the changed files.
 
 - `-f FILE`
 

@@ -32,6 +32,7 @@
             this.mainTabControl = new System.Windows.Forms.TabControl();
             this.tasksTab = new System.Windows.Forms.TabPage();
             this.submUrlsGroupBox = new System.Windows.Forms.GroupBox();
+            this.submUrlsUpdateCheckBox = new System.Windows.Forms.CheckBox();
             this.submUrlsDownloadBtn = new System.Windows.Forms.Button();
             this.submUrlsLoadFileBtn = new System.Windows.Forms.Button();
             this.submUrlsLoadPrvBtn = new System.Windows.Forms.Button();
@@ -66,7 +67,6 @@
             this.dbSubmTextBox = new System.Windows.Forms.TextBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.submUrlsUpdateCheckBox = new System.Windows.Forms.CheckBox();
             this.mainTabControl.SuspendLayout();
             this.tasksTab.SuspendLayout();
             this.submUrlsGroupBox.SuspendLayout();
@@ -121,6 +121,16 @@
             this.submUrlsGroupBox.TabIndex = 1;
             this.submUrlsGroupBox.TabStop = false;
             this.submUrlsGroupBox.Text = "Download a list of submissions";
+            // 
+            // submUrlsUpdateCheckBox
+            // 
+            this.submUrlsUpdateCheckBox.AutoSize = true;
+            this.submUrlsUpdateCheckBox.Location = new System.Drawing.Point(248, 110);
+            this.submUrlsUpdateCheckBox.Name = "submUrlsUpdateCheckBox";
+            this.submUrlsUpdateCheckBox.Size = new System.Drawing.Size(161, 21);
+            this.submUrlsUpdateCheckBox.TabIndex = 6;
+            this.submUrlsUpdateCheckBox.Text = "updates check mode";
+            this.submUrlsUpdateCheckBox.UseVisualStyleBackColor = true;
             // 
             // submUrlsDownloadBtn
             // 
@@ -507,16 +517,6 @@
             // openFileDialog
             // 
             this.openFileDialog.Filter = "Text Files (*.txt, *.log)|*.text;*.txt;*.log|All Files|*.*";
-            // 
-            // submUrlsUpdateCheckBox
-            // 
-            this.submUrlsUpdateCheckBox.AutoSize = true;
-            this.submUrlsUpdateCheckBox.Location = new System.Drawing.Point(248, 110);
-            this.submUrlsUpdateCheckBox.Name = "submUrlsUpdateCheckBox";
-            this.submUrlsUpdateCheckBox.Size = new System.Drawing.Size(161, 21);
-            this.submUrlsUpdateCheckBox.TabIndex = 6;
-            this.submUrlsUpdateCheckBox.Text = "updates check mode";
-            this.submUrlsUpdateCheckBox.UseVisualStyleBackColor = true;
             // 
             // taskForm
             // 
