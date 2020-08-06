@@ -44,6 +44,8 @@ namespace furdown
         private const int INTERNET_COOKIE_HTTPONLY = 0x00002000;
         #endregion
 
+        public string defaultUserId = "";
+
         /// <summary>
         /// Gets all, including http-only, cookies from WebBrowser component
         /// </summary>
@@ -154,6 +156,16 @@ namespace furdown
                     if (!cpage.Contains("/themes/classic/"))
                     {
                         Console.WriteLine("Auth check completed successfully.");
+                        var defUsrMatch = Regex.Match(cpage, @"href=""/commissions/(.+?)/""", RegexOptions.CultureInvariant);
+                        if (defUsrMatch.Success)
+                        {
+                            defaultUserId = defUsrMatch.Groups[1].Value;
+                            //Console.WriteLine("Hi " + defaultUserId);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Warning :: could not determine the username to use for the default target gallery url");
+                        }
                         return true;
                     }
                     else

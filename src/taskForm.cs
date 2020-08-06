@@ -16,10 +16,11 @@ namespace furdown
     {
         private Form closeOnClosingThis = null;
 
-        public taskForm(Form formToClose = null)
+        public taskForm(Form formToClose = null, string defaultUrl = "")
         {
             closeOnClosingThis = formToClose;
             InitializeComponent();
+            galleryUrlBox.Text = defaultUrl;
         }
 
         /// <summary>

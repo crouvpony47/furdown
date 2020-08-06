@@ -265,7 +265,6 @@
             this.galleryUrlBox.Name = "galleryUrlBox";
             this.galleryUrlBox.Size = new System.Drawing.Size(774, 22);
             this.galleryUrlBox.TabIndex = 0;
-            this.galleryUrlBox.Text = "https://www.furaffinity.net/gallery/jt47jade/";
             this.galleryUrlBox.Leave += new System.EventHandler(this.galleryUrlBox_Leave);
             // 
             // settingsTab

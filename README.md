@@ -39,7 +39,7 @@ Tells furdown you also want submission descriptions saved as HTML.
 
 - `-u`, `-upd`, `-update` (since 0.4.9.9b)
 
-Check for content updates. This means comparing the file IDs with the ones stored in furdown's internal cache, and downloading the changed files.
+Check for content updates. This means comparing the file IDs with the ones stored in furdown's internal cache, and downloading the changed files. [(details)](https://github.com/crouvpony47/furdown/issues/15)
 
 - `-f FILE`
 

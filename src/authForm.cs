@@ -20,7 +20,9 @@ namespace furdown
         void OnAuthSuccessful()
         {
             Hide();
-            taskForm tf = new taskForm(this);
+            string defaultUrl = string.IsNullOrEmpty(AppCore.Core.defaultUserId) ? ""
+                : (@"https://www.furaffinity.net/gallery/" + AppCore.Core.defaultUserId);
+            taskForm tf = new taskForm(this, defaultUrl);
             tf.Show();
         }
 
