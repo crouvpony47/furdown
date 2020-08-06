@@ -5,12 +5,9 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.4.5.0)
-- Adapt to the site template changes
-- Improved updates checker
-
-### Changelog (v.0.4.9.9 beta)
+### Changelog (v.0.5.0.0)
 - New feature: content update detection
+- Changed the default gallery URL to be the app user's gallery
 
 ### A note about CF's "I'm Under Attack" mode
 - If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
