@@ -507,6 +507,8 @@ namespace furdown
                     }
                     sp.FILEPART = sp.FILEPARTNE + "." + sp.EXT; //v.0.4.x compat
                     sp.FILEFULL = sp.FILEID + "." + filename;
+                    sp.FILEFULL = Utils.StripIllegalFilenameChars(sp.FILEFULL);
+                    sp.FILEPART = Utils.StripIllegalFilenameChars(sp.FILEPART);
                 }
                 else
                 {

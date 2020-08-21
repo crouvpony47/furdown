@@ -17,7 +17,7 @@ namespace furdown
 
         public static string StripIllegalFilenameChars(string name)
 		{
-			return string.Concat(name.Split(
+			return string.Join("_", name.Split(
 				System.IO.Path.GetInvalidFileNameChars(),
 				StringSplitOptions.RemoveEmptyEntries
 			));
