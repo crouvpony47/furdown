@@ -362,7 +362,7 @@ namespace furdown
                     Console.WriteLine("Unexpected error (DB presence check failed)!");
                     continue;
                 }
-                
+
                 // get submission page
                 string subUrl = "https://www.furaffinity.net/view/" + subId;
                 int attempts = 3;
@@ -389,10 +389,18 @@ namespace furdown
                 }
 
                 // process submission page
-                string downbtnkey = "<a href=\"//d.facdn.net/";
+                var downbtnkeys = new string[]{"<a href=\"//d.facdn.net/", "<a href=\"//d2.facdn.net/"};
                 SubmissionProps sp = new SubmissionProps();
                 sp.SUBMID = subId;
-                int keypos = cpage.IndexOf(downbtnkey, StringComparison.Ordinal);
+                int keypos = -1;
+                foreach (var downbtnkey in downbtnkeys)
+                {
+                    keypos = cpage.IndexOf(downbtnkey, StringComparison.Ordinal);
+                    if (keypos >= 0)
+                    {
+                        break;
+                    }
+                }
                 if (keypos < 0)
                 {
                     Console.WriteLine("[Warning] got page, but it doesn't contain any download links.");
