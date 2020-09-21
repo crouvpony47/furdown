@@ -45,6 +45,10 @@
             this.galleryDownloadBtn = new System.Windows.Forms.Button();
             this.galleryUrlBox = new System.Windows.Forms.TextBox();
             this.settingsTab = new System.Windows.Forms.TabPage();
+            this.scrapsPassTemplateLabel = new System.Windows.Forms.Label();
+            this.scrapsPassTemplateBox = new System.Windows.Forms.TextBox();
+            this.scrapsActTemplateLabel = new System.Windows.Forms.Label();
+            this.scrapsActTemplateBox = new System.Windows.Forms.TextBox();
             this.neverDownloadTwiceCheckBox = new System.Windows.Forms.CheckBox();
             this.descrFilenameLabel = new System.Windows.Forms.Label();
             this.descrFilenameBox = new System.Windows.Forms.TextBox();
@@ -270,6 +274,10 @@
             // settingsTab
             // 
             this.settingsTab.AutoScroll = true;
+            this.settingsTab.Controls.Add(this.scrapsPassTemplateLabel);
+            this.settingsTab.Controls.Add(this.scrapsPassTemplateBox);
+            this.settingsTab.Controls.Add(this.scrapsActTemplateLabel);
+            this.settingsTab.Controls.Add(this.scrapsActTemplateBox);
             this.settingsTab.Controls.Add(this.neverDownloadTwiceCheckBox);
             this.settingsTab.Controls.Add(this.descrFilenameLabel);
             this.settingsTab.Controls.Add(this.descrFilenameBox);
@@ -293,10 +301,46 @@
             this.settingsTab.Text = "Settings";
             this.settingsTab.UseVisualStyleBackColor = true;
             // 
+            // scrapsPassTemplateLabel
+            // 
+            this.scrapsPassTemplateLabel.AutoSize = true;
+            this.scrapsPassTemplateLabel.Location = new System.Drawing.Point(15, 447);
+            this.scrapsPassTemplateLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.scrapsPassTemplateLabel.Name = "scrapsPassTemplateLabel";
+            this.scrapsPassTemplateLabel.Size = new System.Drawing.Size(352, 17);
+            this.scrapsPassTemplateLabel.TabIndex = 20;
+            this.scrapsPassTemplateLabel.Text = "%SCRAPS% value when handling non-scraps galleries";
+            // 
+            // scrapsPassTemplateBox
+            // 
+            this.scrapsPassTemplateBox.Location = new System.Drawing.Point(15, 466);
+            this.scrapsPassTemplateBox.Margin = new System.Windows.Forms.Padding(4);
+            this.scrapsPassTemplateBox.Name = "scrapsPassTemplateBox";
+            this.scrapsPassTemplateBox.Size = new System.Drawing.Size(472, 22);
+            this.scrapsPassTemplateBox.TabIndex = 19;
+            // 
+            // scrapsActTemplateLabel
+            // 
+            this.scrapsActTemplateLabel.AutoSize = true;
+            this.scrapsActTemplateLabel.Location = new System.Drawing.Point(15, 400);
+            this.scrapsActTemplateLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.scrapsActTemplateLabel.Name = "scrapsActTemplateLabel";
+            this.scrapsActTemplateLabel.Size = new System.Drawing.Size(266, 17);
+            this.scrapsActTemplateLabel.TabIndex = 18;
+            this.scrapsActTemplateLabel.Text = "%SCRAPS% value when handling scraps";
+            // 
+            // scrapsActTemplateBox
+            // 
+            this.scrapsActTemplateBox.Location = new System.Drawing.Point(15, 419);
+            this.scrapsActTemplateBox.Margin = new System.Windows.Forms.Padding(4);
+            this.scrapsActTemplateBox.Name = "scrapsActTemplateBox";
+            this.scrapsActTemplateBox.Size = new System.Drawing.Size(472, 22);
+            this.scrapsActTemplateBox.TabIndex = 17;
+            // 
             // neverDownloadTwiceCheckBox
             // 
             this.neverDownloadTwiceCheckBox.AutoSize = true;
-            this.neverDownloadTwiceCheckBox.Location = new System.Drawing.Point(19, 406);
+            this.neverDownloadTwiceCheckBox.Location = new System.Drawing.Point(19, 511);
             this.neverDownloadTwiceCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.neverDownloadTwiceCheckBox.Name = "neverDownloadTwiceCheckBox";
             this.neverDownloadTwiceCheckBox.Size = new System.Drawing.Size(281, 21);
@@ -324,7 +368,7 @@
             // 
             // applyNSaveBtn
             // 
-            this.applyNSaveBtn.Location = new System.Drawing.Point(15, 454);
+            this.applyNSaveBtn.Location = new System.Drawing.Point(19, 545);
             this.applyNSaveBtn.Margin = new System.Windows.Forms.Padding(4);
             this.applyNSaveBtn.Name = "applyNSaveBtn";
             this.applyNSaveBtn.Size = new System.Drawing.Size(155, 33);
@@ -585,5 +629,9 @@
         private System.Windows.Forms.Button useLinksListBtn;
         private System.Windows.Forms.CheckBox galleryUpdateCheckBox;
         private System.Windows.Forms.CheckBox submUrlsUpdateCheckBox;
+        private System.Windows.Forms.Label scrapsPassTemplateLabel;
+        private System.Windows.Forms.TextBox scrapsPassTemplateBox;
+        private System.Windows.Forms.Label scrapsActTemplateLabel;
+        private System.Windows.Forms.TextBox scrapsActTemplateBox;
     }
 }

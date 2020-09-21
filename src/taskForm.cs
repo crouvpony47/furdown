@@ -45,6 +45,8 @@ namespace furdown
             GlobalSettings.Settings.filenameTemplate = filenameTemplateBox.Text;
             GlobalSettings.Settings.descrFilenameTemplate = descrFilenameBox.Text;
             GlobalSettings.Settings.downloadOnlyOnce = neverDownloadTwiceCheckBox.Checked;
+            GlobalSettings.Settings.scrapsTemplateActive = scrapsActTemplateBox.Text;
+            GlobalSettings.Settings.scrapsTemplatePassive = scrapsPassTemplateBox.Text;
             GlobalSettings.GlobalSettingsSave();
             mainTabControl.SelectedTab = tasksTab;
         }
@@ -61,6 +63,8 @@ namespace furdown
             filenameTemplateBox.Text = GlobalSettings.Settings.filenameTemplate;
             descrFilenameBox.Text = GlobalSettings.Settings.descrFilenameTemplate;
             neverDownloadTwiceCheckBox.Checked = GlobalSettings.Settings.downloadOnlyOnce;
+            scrapsActTemplateBox.Text = GlobalSettings.Settings.scrapsTemplateActive;
+            scrapsPassTemplateBox.Text = GlobalSettings.Settings.scrapsTemplatePassive;
         }
 
         private async void galleryDownloadBtn_Click(object sender, EventArgs e)
@@ -172,8 +176,7 @@ namespace furdown
             foreach (var line in lines)
             {
                 if (!string.IsNullOrEmpty(line)
-                    && !Regex.IsMatch(line, @"^[0-9]+$")
-                    && !Regex.IsMatch(line, @"^[0-9]+#[0-9]+$"))
+                    && !Regex.IsMatch(line, @"^(?<id>[0-9]+?)(#(?<fid>[0-9]+?)){0,1}(@(?<attr>.+?)){0,1}$"))
                 {
                     return false;
                 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +16,14 @@ namespace furdown
         public string filenameTemplate;
         public string descrFilenameTemplate;
         public bool downloadOnlyOnce;
-        
+
+        // %SCRAPS% substitute when handling scraps galleries
+        [OptionalField(VersionAdded = 2)]
+        public string scrapsTemplateActive;
+        // %SCRAPS% substitute when handling non-scraps galleries and loose submissions
+        [OptionalField(VersionAdded = 2)]
+        public string scrapsTemplatePassive;
+
         [NonSerialized]
         public static GlobalSettings Settings;
 
@@ -23,6 +31,13 @@ namespace furdown
         private static string appDataPath;
         [NonSerialized]
         private static string settingsFN;
+
+        [OnDeserialized()]
+        public void DbDeserialized(StreamingContext context)
+        {
+            if (scrapsTemplateActive == null) scrapsTemplateActive = ".scraps";
+            if (scrapsTemplatePassive == null) scrapsTemplatePassive = "";
+        }
 
         /// <summary>
         /// Creates a singleton settings object and loads parameters from file, if it exists.
@@ -33,10 +48,10 @@ namespace furdown
             appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             settingsFN = Path.Combine(appDataPath, "furdown\\furdown.conf");
             // true portable mode
-			if (File.Exists("./furdown-portable.conf"))
-			{
-				settingsFN = "./furdown-portable.conf";
-			}
+            if (File.Exists("./furdown-portable.conf"))
+            {
+                settingsFN = "./furdown-portable.conf";
+            }
             // if settings file exists, load it
             bool needToSetDefaults = false;
             if (File.Exists(settingsFN))
@@ -65,10 +80,13 @@ namespace furdown
             {
                 Settings.downloadPath = Path.Combine(appDataPath, "furdown\\downloads");
                 Settings.systemPath = Path.Combine(appDataPath, "furdown\\system");
-                Settings.filenameTemplate = "%ARTIST%\\%SUBMID%.%FILEPART%";
-                Settings.descrFilenameTemplate = "%ARTIST%\\%SUBMID%.%FILEPART%.dsc.htm";
+                Settings.filenameTemplate = "%ARTIST%%SCRAPS%\\%SUBMID%.%FILEPART%";
+                Settings.descrFilenameTemplate = "%ARTIST%%SCRAPS%\\%SUBMID%.%FILEPART%.dsc.htm";
                 Settings.downloadOnlyOnce = true;
-                try { 
+                Settings.scrapsTemplateActive = ".scraps";
+                Settings.scrapsTemplateActive = "";
+                try
+                {
                     Directory.CreateDirectory(Settings.downloadPath);
                     Directory.CreateDirectory(Settings.systemPath);
                 }

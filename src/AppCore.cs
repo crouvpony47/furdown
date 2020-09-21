@@ -202,6 +202,7 @@ namespace furdown
         public async Task<List<string>> CreateSubmissionsListFromGallery(string gallery)
         {
             Console.WriteLine("Building submissions list for " + gallery);
+            string commonAttributes = (gallery.Contains("/scraps/") ? "@s" : "");
             TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.Indeterminate);
             List<string> lst = new List<string>();
             int page = 0;
@@ -251,7 +252,7 @@ namespace furdown
                         {
                             Console.WriteLine(string.Format("Warning :: file ID could not be determined for submission {0}", sid));
                         }
-                        lst.Add(string.Format("{0}#{1}", sid, fid));
+                        lst.Add(string.Format("{0}#{1}", sid, fid) + commonAttributes);
                         counter++;
                         string key = nextMatch.Groups[0].Value;
                         cpage = cpage.Substring(cpage.IndexOf(key, StringComparison.Ordinal) + key.Length);
@@ -307,36 +308,45 @@ namespace furdown
             // iterate over all the submissions in list
             for (int i = subs.Count - 1; i >= 0; i--)
             {
-                // first, determine submission and file IDs from the string representation (`sid#fid` or `sid`)
+                // expected format: ID#FileID@attributes
+                // everything except for ID is optional
                 string subStr = subs[i];
-                string subId;
-                uint subFid = 0;
                 if (string.IsNullOrEmpty(subStr)) continue; // don't care about empty strings
-                var subStrComponents = subStr.Split("#".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                if (subStrComponents.Length == 1)
+
+                string subId;
+                uint subIdInt = 0;
+                uint subFid = 0;
+                bool aScraps = false;
+
+                const string subIdRegex = @"^(?<id>[0-9]+?)(#(?<fid>[0-9]+?)){0,1}(@(?<attr>.+?)){0,1}$";
+                var subIdMatch = Regex.Match(subStr, subIdRegex);
+                if (subIdMatch.Success)
                 {
-                    subId = subStr;
-                }
-                else if (subStrComponents.Length == 2)
-                {
-                    subId = subStrComponents[0];
-                    uint.TryParse(subStrComponents[1], out subFid);
+                    subId = subIdMatch.Groups["id"].Value;
+                    uint.TryParse(subId, out subIdInt);
+                    if (subIdMatch.Groups["fid"].Success)
+                    {
+                        uint.TryParse(subIdMatch.Groups["fid"].Value, out subFid);
+                    }
+                    if (subIdMatch.Groups["attr"].Success)
+                    {
+                        string attributes = subIdMatch.Groups["attr"].Value;
+                        if (attributes.Contains("s")) aScraps = true;
+                    }
                 }
                 else
                 {
                     Console.WriteLine("Error :: Malformed submission ID: " + subStr);
                     continue;
                 }
-                uint subIdInt = 0;
-                uint.TryParse(subId, out subIdInt);
-                if (subIdInt == 0)
-                {
-                    Console.WriteLine("Warning :: Bad submission index: " + subId);
-                    continue;
-                }
+                
                 uint dbSubId = SubmissionsDB.DB.GetFileId(subIdInt);
 
-                Console.WriteLine("> Processing submission #" + subId);
+                Console.WriteLine(string.Format("> Processing submission {0} {1} {2}",
+                    subId,
+                    subFid > 0 ? string.Format("(file id {0})", subFid) : "",
+                    aScraps ? "(scraps)" : ""
+                ));
 
                 // check if in DB already
                 try
@@ -528,6 +538,9 @@ namespace furdown
                 // apply template(s)
                 string fname = GlobalSettings.Settings.filenameTemplate;
                 string dfname = GlobalSettings.Settings.descrFilenameTemplate;
+                var scrapsTemplate = aScraps ? GlobalSettings.Settings.scrapsTemplateActive : GlobalSettings.Settings.scrapsTemplatePassive;
+                fname = fname.Replace("%SCRAPS%", scrapsTemplate);
+                dfname = dfname.Replace("%SCRAPS%", scrapsTemplate);
                 foreach (FieldInfo fi
                     in sp.GetType().GetFields(
                     BindingFlags.Instance | BindingFlags.Public).ToArray()

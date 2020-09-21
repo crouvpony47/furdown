@@ -129,6 +129,8 @@
 %FILEPART% - right part of filename
 %FILEPARTNE% - right part of filename, excluding extension
 %EXT% - extension
+
+%SCRAPS% is replaced with one of two subtemplates depending on whether or not the submission belongs to a scraps gallery.
 ----------------------------
 For example, for submission
 https://www.furaffinity.net/view/16076336/
