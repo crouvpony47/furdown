@@ -634,18 +634,23 @@ namespace furdown
                 try
                 {
                     Console.WriteLine("Downloading: " + sp.URL);
-                    using (
-                        Stream contentStream = await (
-                            await http.GetAsync(sp.URL, HttpCompletionOption.ResponseHeadersRead)
-                        ).Content.ReadAsStreamAsync(),
-                        stream = new FileStream(
-                            fnamefull,
-                            FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024 /*Mb*/, true
-                        )
-                    )
+                    using (var response = await http.GetAsync(sp.URL, HttpCompletionOption.ResponseHeadersRead))
                     {
-                        await ReadNetworkStream(contentStream, stream, 5000);
-                        // await contentStream.CopyToAsync(stream); // this works, but may hang forever in case of network errors
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new Exception(string.Format("HTTP error: {0}", response.StatusCode));
+                        }
+                        using (
+                            Stream contentStream = await response.Content.ReadAsStreamAsync(),
+                            stream = new FileStream(
+                                fnamefull,
+                                FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024 /*Mb*/, true
+                            )
+                        )
+                        {
+                            await ReadNetworkStream(contentStream, stream, 5000);
+                            // await contentStream.CopyToAsync(stream); // this works, but may hang forever in case of network errors
+                        }
                     }
                 }
                 catch (Exception E)
