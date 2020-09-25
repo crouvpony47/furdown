@@ -42,14 +42,21 @@ namespace furdown
             const int URLMON_OPTION_USERAGENT = 0x10000001;
             const string ua = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
 
+            static string GetUserAgent()
+            {
+                string envUa = Environment.GetEnvironmentVariable("FURDOWN_USERAGENT");
+                return envUa == null ? ua : envUa;
+            }
+
             public static void SetKnownUserAgent()
             {
-                UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, ua, ua.Length, 0);
+                var userAgent = GetUserAgent();
+                UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, userAgent, userAgent.Length, 0);
             }
 
             public static string GetKnownUserAgentValue()
             {
-                return ua;
+                return GetUserAgent();
             }
         }
     }

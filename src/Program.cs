@@ -38,6 +38,8 @@ namespace furdown
                 if (!AuthRes)
                 {
                     Console.WriteLine("Not authorized! Log in at least once using GUI first.");
+                    Console.WriteLine("Alternatively, provide the 'cookie' and 'user-agent' header values");
+                    Console.WriteLine("via FURDOWN_COOKIES and FURDOWN_USERAGENT environment variables.");
                     return;
                 }
                 CommandLineInterface.Execute(args).Wait();

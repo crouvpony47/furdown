@@ -37,8 +37,18 @@ namespace furdown
             bool AuthRes = await AppCore.Core.Init();
             if (!AuthRes)
             {
-                Console.WriteLine("Does not seem to be authorized (or need to pass CF validation)...");
-                authWebBrowser.Navigate("https://www.furaffinity.net/login/");
+                if (Environment.GetEnvironmentVariable("FURDOWN_COOKIES") == null)
+                {
+                    Console.WriteLine("Does not seem to be authorized (or need to pass CF validation)...");
+                    authWebBrowser.Navigate("https://www.furaffinity.net/login/");
+                }
+                else
+                {
+                    MessageBox.Show("FURDOWN_COOKIES environment variable is set, but the cookies provided " +
+                                    "could not be used to authenticate the user. Please set a valid value " +
+                                    "or unset FURDOWN_COOKIES to use the default login mechanism.");
+                    Close();
+                }
             }
             else
             {

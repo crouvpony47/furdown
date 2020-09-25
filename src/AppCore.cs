@@ -38,9 +38,10 @@ namespace furdown
         #region HTTP-related members
         private HttpClientHandler httph = null;
         private HttpClient http = null;
-
+        #if !furdown_portable_core
         [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref uint pcchCookieData, int dwFlags, IntPtr lpReserved);
+        #endif
         private const int INTERNET_COOKIE_HTTPONLY = 0x00002000;
         #endregion
 
@@ -53,6 +54,10 @@ namespace furdown
         /// <returns></returns>
         private static string GetGlobalCookies(string uri)
         {
+            string envCookies = Environment.GetEnvironmentVariable("FURDOWN_COOKIES");
+            if (envCookies != null) return envCookies;
+
+            #if !furdown_portable_core
             uint datasize = 1024;
             StringBuilder cookieData = new StringBuilder((int)datasize);
             if (InternetGetCookieEx(
@@ -65,6 +70,9 @@ namespace furdown
             {
                 return null;
             }
+            #else
+            return null;
+            #endif
         }
 
         /// <summary>
