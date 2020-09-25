@@ -5,9 +5,10 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.5.0.0)
-- New feature: content update detection
-- Changed the default gallery URL to be the app user's gallery
+### Changelog (v.0.5.1.0)
+- Added: scraps galleries can now have a distinct filename pattern;
+- Fixed: better handling for HTTP 502 (and similar) errors when making a request to the CDN;
+- Added: advanced settings to help with alternative authentication scenarios (see "Advanced options" section below)
 
 ### A note about CF's "I'm Under Attack" mode
 - If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
@@ -74,3 +75,9 @@ __*__ As templates use the syntax much like that used for environment variables,
 - `furdown.exe -b -d -g https://www.furaffinity.net/scraps/flipstick -dt %ARTIST%.s\%SUBMID%.%FILEPART%.dsc.htm -st %ARTIST%.s\%SUBMID%.%FILEPART%`
 
 Note that `%` might need to be escaped as `%%` in batch scripts.
+
+### Advanced options
+
+The builtin authentication mechanism based on the embedded Internet Explorer can be bypassed by setting FURDOWN_COOKIES and FURDOWN_USERAGENT environment variables to the appropriate values. If only FURDOWN_USERAGENT is set, furdown and its embedded IE will use the User-Agent value provided, and if only FURDOWN_COOKIES is set, it is your responsibility to match the User-Agent of the cookies source and the one used by furdown.
+
+Note that the FURDOWN_COOKIES is expected to contain the entire cookie header value (something like `b=XXX; __gads=XXX; a=XXX; s=XXX; __qca=XXX; sz=XXX; cc=XXX; __cfduid=XXX` where `XXX`s are some values)
