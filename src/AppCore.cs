@@ -711,7 +711,7 @@ namespace furdown
                 if (res.failedToGetPage.Count > 0 || res.failedToDownload.Count > 0)
                 {
                     File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "get_sub_page_failed.log"), res.failedToGetPage);
-                    File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "download_failed.log"), res.failedToGetPage);
+                    File.WriteAllLines(Path.Combine(GlobalSettings.Settings.systemPath, "download_failed.log"), res.failedToDownload);
                 }
             }
             catch (Exception E)
