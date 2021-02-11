@@ -135,6 +135,7 @@
             this.submUrlsUpdateCheckBox.TabIndex = 6;
             this.submUrlsUpdateCheckBox.Text = "updates check mode";
             this.submUrlsUpdateCheckBox.UseVisualStyleBackColor = true;
+            this.submUrlsUpdateCheckBox.Visible = false;
             // 
             // submUrlsDownloadBtn
             // 
@@ -225,6 +226,7 @@
             this.galleryUpdateCheckBox.TabIndex = 4;
             this.galleryUpdateCheckBox.Text = "updates check mode";
             this.galleryUpdateCheckBox.UseVisualStyleBackColor = true;
+            this.galleryUpdateCheckBox.Visible = false;
             // 
             // useLinksListBtn
             // 

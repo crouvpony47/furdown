@@ -407,7 +407,10 @@ namespace furdown
                 }
 
                 // process submission page
-                var downbtnkeys = new string[]{"<a href=\"//d.facdn.net/", "<a href=\"//d2.facdn.net/"};
+                var downbtnkeys = new string[]{
+                    "<a href=\"//d.facdn.net/", "<a href=\"//d2.facdn.net/",
+                    "<a href=\"//d.furaffinity.net/"
+                };
                 SubmissionProps sp = new SubmissionProps();
                 sp.SUBMID = subId;
                 int keypos = -1;
@@ -642,7 +645,9 @@ namespace furdown
                 try
                 {
                     Console.WriteLine("Downloading: " + sp.URL);
-                    using (var response = await http.GetAsync(sp.URL, HttpCompletionOption.ResponseHeadersRead))
+                    // "?" can only be in the URL if the user named their submission this way
+                    // it WILL be mistreated as an URL parameter, but this dirty hack with explicit replacement fixes it
+                    using (var response = await http.GetAsync(sp.URL.Replace("?", "%3F"), HttpCompletionOption.ResponseHeadersRead))
                     {
                         if (!response.IsSuccessStatusCode)
                         {
