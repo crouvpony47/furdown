@@ -389,28 +389,29 @@ namespace furdown
                 }
                 
                 uint dbSubId = SubmissionsDB.DB.GetFileId(subIdInt);
+                bool dbSubExists = SubmissionsDB.DB.Exists(subIdInt);
 
                 Console.WriteLine(string.Format("> Processing submission {0} {1}",
                     subId,
                     subFid > 0 ? string.Format("(file id {0})", subFid) : ""
                 ));
 
-                // check if in DB already
+                // Skip submissions we have already downloaded, unless forced to or the update mode is active.
+                // Note that subFid may be zero at this point, if not provided by the user or the previous step
                 try
                 {
-                    if (SubmissionsDB.DB.Exists(subIdInt)
-                        && GlobalSettings.Settings.downloadOnlyOnce)
+                    if (dbSubExists && GlobalSettings.Settings.downloadOnlyOnce)
                     {
                         // if we're in the update mode, and the file id in the DB doesn't match the new one
                         // (or both are missing), we cannot guarantee that we have the right thing
-                        if (!(updateMode && (dbSubId != subFid || dbSubId == 0)))
+                        if (updateMode && (dbSubId != subFid || dbSubId == 0))
                         {
-                            Console.WriteLine("Skipped (present in DB)");
-                            continue;
+                            Console.WriteLine("Submission is present in the DB, but may have been updated; re-checking");
                         }
                         else
                         {
-                            Console.WriteLine("Submission is present in the DB, but may have been updated; re-checking");
+                            Console.WriteLine("Skipped (present in DB)");
+                            continue;
                         }
                     }
                 }
@@ -679,9 +680,9 @@ namespace furdown
                 bool mayBeUselessDownload = false;
                 string oldFileHash = "";
                 // file exists and we're either not interested in updates, or the version in db matches the one on site
-                if (File.Exists(fnamefull) && (subFid == SubmissionsDB.DB.GetFileId(subIdInt) || !updateMode))
+                if (File.Exists(fnamefull) && (subFid == dbSubId || !updateMode))
                 {
-                    if (subFid != SubmissionsDB.DB.GetFileId(subIdInt))
+                    if (subFid != dbSubId)
                     {
                         Console.WriteLine(string.Format(
                             "Note :: submission {0} could've been updated, consider running this task in update mode", subId
@@ -693,16 +694,17 @@ namespace furdown
                 }
                 if (updateMode)
                 {
-                    if (sp.CURFILEID == sp.FILEID)
+                    if (sp.CURFILEID == sp.FILEID && dbSubExists)
                     {
-                        Console.WriteLine("Note :: this submission has never been updated, just adding the file ID to the DB.");
+                        Console.WriteLine("Note :: this submission has never been updated and is present in the DB, \n"
+                                        + "adding the file ID to the DB without downloading anything.");
                         SubmissionsDB.DB.AddSubmissionWithFileId(subIdInt, subFid);
                         continue;
                     }
                     else if (File.Exists(fnamefull))
                     {
                         // versions mismatch
-                        if (SubmissionsDB.DB.GetFileId(subIdInt) == 0)
+                        if (dbSubId == 0)
                         {
                             // we have some version, but don't know which (likely a v.0.4.x download)
                             // download the actual one, but delete if it's the same
