@@ -275,5 +275,10 @@ namespace furdown
             galleryUrlBox.Text = "$" + openFileDialog.FileName;
             galleryDownloadBtn.Focus();
         }
+
+        private void taskForm_Load(object sender, EventArgs e)
+        {
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
     }
 }

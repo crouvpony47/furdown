@@ -575,6 +575,7 @@
             this.Name = "taskForm";
             this.Text = "furdown :: tasks";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.taskForm_FormClosed);
+            this.Load += new System.EventHandler(this.taskForm_Load);
             this.Shown += new System.EventHandler(this.taskForm_Shown);
             this.mainTabControl.ResumeLayout(false);
             this.tasksTab.ResumeLayout(false);

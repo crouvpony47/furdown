@@ -35,21 +35,24 @@
             // 
             this.authWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
             this.authWebBrowser.Location = new System.Drawing.Point(0, 0);
-            this.authWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.authWebBrowser.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.authWebBrowser.MinimumSize = new System.Drawing.Size(27, 25);
             this.authWebBrowser.Name = "authWebBrowser";
             this.authWebBrowser.ScriptErrorsSuppressed = true;
-            this.authWebBrowser.Size = new System.Drawing.Size(784, 411);
+            this.authWebBrowser.Size = new System.Drawing.Size(1045, 506);
             this.authWebBrowser.TabIndex = 0;
             this.authWebBrowser.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.authWebBrowser_Navigated);
             // 
             // authForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 411);
+            this.ClientSize = new System.Drawing.Size(1045, 506);
             this.Controls.Add(this.authWebBrowser);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "authForm";
             this.Text = "furdown :: authorization";
+            this.Load += new System.EventHandler(this.authForm_Load);
             this.Shown += new System.EventHandler(this.authForm_Shown);
             this.ResumeLayout(false);
 

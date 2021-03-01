@@ -95,5 +95,10 @@ namespace furdown
                 }
             }
         }
+
+        private void authForm_Load(object sender, EventArgs e)
+        {
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
     }
 }
