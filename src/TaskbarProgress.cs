@@ -55,9 +55,21 @@ namespace furdown
         private static ITaskbarList3 taskbarInstance =
             taskbarSupported ? (ITaskbarList3)new TaskbarInstance() : null;
 
+        private static bool IndicatorStateLocked = false;
+
+        public static void LockState()
+        {
+            IndicatorStateLocked = true;
+        }
+
+        public static void UnlockState()
+        {
+            IndicatorStateLocked = false;
+        }
+
         public static void SetState(IntPtr windowHandle, TaskbarStates taskbarState)
         {
-            if (taskbarSupported)
+            if (taskbarSupported && !IndicatorStateLocked)
             {
                 taskbarInstance.SetProgressState(windowHandle, taskbarState);
             }
@@ -65,7 +77,7 @@ namespace furdown
 
         public static void SetValue(IntPtr windowHandle, int progressValue, int progressMax)
         {
-            if (taskbarSupported)
+            if (taskbarSupported && !IndicatorStateLocked)
             {
                 taskbarInstance.SetProgressValue(windowHandle, (ulong)progressValue, (ulong)progressMax);
             }

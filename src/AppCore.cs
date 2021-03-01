@@ -783,6 +783,8 @@ namespace furdown
                 try
                 {
                     string[] urls = File.ReadAllLines(listFile);
+                    TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.Indeterminate);
+                    TaskbarProgress.LockState();
                     foreach (string url in urls)
                     {
                         string urlFixed = url.TrimEnd(" /".ToCharArray()); // not expecting C# 7.3+ compiler, so can't just assign to "url"
@@ -793,6 +795,8 @@ namespace furdown
                             if (subListFromUrl != null) subs.AddRange(subListFromUrl);
                         }
                     }
+                    TaskbarProgress.UnlockState();
+                    TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.NoProgress);
                 }
                 catch (Exception E)
                 {
