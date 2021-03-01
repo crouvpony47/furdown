@@ -336,11 +336,13 @@ namespace furdown
                     {
                         uint.TryParse(subIdMatch.Groups["fid"].Value, out subFid);
                     }
-                    if (subIdMatch.Groups["attr"].Success)
-                    {
-                        string attributes = subIdMatch.Groups["attr"].Value;
-                        if (attributes.Contains("s")) aScraps = true;
-                    }
+                    /// Attributes section has only been used for (terrible) scraps detection;
+                    /// a better method is now implemented, making the section useless
+                    //if (subIdMatch.Groups["attr"].Success)
+                    //{
+                    //    string attributes = subIdMatch.Groups["attr"].Value;
+                    //    if (attributes.Contains("s")) aScraps = true;
+                    //}
                 }
                 else
                 {
@@ -350,10 +352,9 @@ namespace furdown
                 
                 uint dbSubId = SubmissionsDB.DB.GetFileId(subIdInt);
 
-                Console.WriteLine(string.Format("> Processing submission {0} {1} {2}",
+                Console.WriteLine(string.Format("> Processing submission {0} {1}",
                     subId,
-                    subFid > 0 ? string.Format("(file id {0})", subFid) : "",
-                    aScraps ? "(scraps)" : ""
+                    subFid > 0 ? string.Format("(file id {0})", subFid) : ""
                 ));
 
                 // check if in DB already
@@ -492,15 +493,30 @@ namespace furdown
                 }
                 #endregion
 
-                // processing submission description; also extracts submission date and title
+                #region scraps detection, submission date, title and description
                 {
+                    const string key_title = @"<div class=""submission-title"">";
+                    const string key_enddiv = "</div>";
+                    var submTitlePos = cpage.IndexOf(key_title, StringComparison.Ordinal);
+
+                    // scraps check: if there is a link to /$user/scraps before the submission title, it's in scraps
+                    var scrapsCheckMatch = Regex.Match(cpage, string.Format(@"href=""/scraps/{0}/""", Regex.Escape(sp.ARTIST)));
+                    if (scrapsCheckMatch.Success && scrapsCheckMatch.Index < submTitlePos)
+                    {
+                        Console.WriteLine("Location: scraps");
+                        aScraps = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Location: main gallery");
+                        aScraps = false;
+                    }
+
                     Utils.FillPropertiesFromDateTime(DateTime.Now, sp); // set Now as a fallback date
                     sp.TITLE = "Unknown"; // fallback title
 
                     // title
-                    const string key_title = @"<div class=""submission-title"">";
-                    const string key_enddiv = "</div>";
-                    cpage = cpage.Substring(cpage.IndexOf(key_title, StringComparison.Ordinal));
+                    cpage = cpage.Substring(submTitlePos);
                     string sub_title_div = cpage.Substring(0,
                                                            cpage.IndexOf(key_enddiv, cpage.IndexOf(key_enddiv, StringComparison.Ordinal) + 1,
                                                                          StringComparison.Ordinal) + key_enddiv.Length);
@@ -565,6 +581,7 @@ namespace furdown
                             Posted {{{date}}}
                         </div><hr>".Replace("{{{title}}}", sp.TITLE).Replace("{{{date}}}", sub_date_strong) + cpage;
                 }
+                #endregion
 
                 // apply template(s)
                 string fname = GlobalSettings.Settings.filenameTemplate;
