@@ -95,6 +95,13 @@ namespace furdown
                     Console.WriteLine("[Error] Default paths are invalid!");
                 }
             }
+            else
+            {
+                if (!Directory.Exists(Settings.downloadPath))
+                    Directory.CreateDirectory(Settings.downloadPath);
+                if (!Directory.Exists(Settings.systemPath))
+                    Directory.CreateDirectory(Settings.systemPath);
+            }
             SubmissionsDB.Load();
         }
 

@@ -215,13 +215,19 @@ namespace furdown
             List<string> lst = new List<string>();
             int page = 0;
             long favNextId = -1;
+            long subInboxStamp = long.MaxValue;
+            int subInboxSpp = 48;
             while (true)
             {
                 page++;
-                string pageUrl = gallery + ((page == 1 ) ? "/" : ("/" + page.ToString()));
+                string pageUrl = gallery + ((page == 1) ? "/" : ("/" + page.ToString()));
                 if (favNextId >= 0)
                 {
                     pageUrl = gallery + "/" + favNextId.ToString() + "/next";
+                }
+                if (subInboxStamp != long.MaxValue)
+                {
+                    pageUrl = gallery + "/new~" + subInboxStamp.ToString() + "@" + subInboxSpp.ToString() + "/";
                 }
                 const string submIdAndFidRegex = @"figure id=""sid-(.+?)"".+?@.+?-(.+?)[.""]"; // group 1: subm id, group 2: file id
                 // get page listing submissions
@@ -286,6 +292,38 @@ namespace furdown
                         }
                     }
                     else
+                    {
+                        Console.WriteLine("Last page reached.");
+                        break;
+                    }
+                }
+
+                // submissions inbox
+                if (pageUrl.Contains("/msg/submissions/"))
+                {
+                    const string nextPrevBtnRe = @"<a.*?new~(.+?)@(.*?)/.*?/a>";
+                    MatchCollection npMatches = Regex.Matches(cpage, nextPrevBtnRe);
+                    bool hasGoodNextPage = false;
+                    foreach (Match npMatch in npMatches)
+                    {
+                        if (!npMatch.Value.Contains("more")) continue;
+                        try
+                        {
+                            var subInboxStampCand = long.Parse(npMatch.Groups[1].Value);
+                            if (subInboxStampCand < subInboxStamp)
+                            {
+                                subInboxStamp = subInboxStampCand;
+                                subInboxSpp = int.Parse(npMatch.Groups[2].Value);
+                                hasGoodNextPage = true;
+                            }
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Warning :: can't get the next page URL");
+                            break;
+                        }
+                    }
+                    if (!hasGoodNextPage)
                     {
                         Console.WriteLine("Last page reached.");
                         break;
