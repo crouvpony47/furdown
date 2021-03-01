@@ -433,10 +433,69 @@ namespace furdown
                 sp.URL = "https:"
                     + cpage.Substring(0, cpage.IndexOf("\"", StringComparison.Ordinal));
 
-				// processing submission description; also extracts submission date and title
-				{
-					Utils.FillPropertiesFromDateTime(DateTime.Now, sp); // set Now as a fallback date
-					sp.TITLE = "Unknown"; // fallback title
+                #region download URL parsing
+                bool extensionInvalid = false; // future use, possibly come up with an extension that makes sense on a case by case basis
+                const string urlComponentsRegex = @"\/art\/(?<artist>.+?)\/.*?(?<curfid>\d+?)\/(?<fid>.+?)\.(?<fname>.*)$";
+                var urlCompMatch = Regex.Match(sp.URL, urlComponentsRegex);
+                if (urlCompMatch.Success)
+                {
+                    sp.ARTIST = urlCompMatch.Groups["artist"].Value;
+                    sp.CURFILEID = urlCompMatch.Groups["curfid"].Value;
+                    uint.TryParse(sp.CURFILEID, out subFid);
+                    sp.FILEID = urlCompMatch.Groups["fid"].Value;
+                    string filename = urlCompMatch.Groups["fname"].Value;
+                    /// original filename usually follows this pattern:
+                    ///     $file_id.$artist_originalFileName.ext
+                    ///             [^ "fname" group value       ]
+                    /// however, some old (~2006) submissions use this pattern instead:
+                    ///     $file_id.$artist.originalFileName.ext
+                    /// it is also quite common for the fname to be blank, i.e.
+                    ///     $file_id.
+                    /// in this case we have no choice but to come up with our own name
+                    var fnameCheckMatch = Regex.Match(filename, string.Format(@"^{0}[_.](.+)", Regex.Escape(sp.ARTIST)));
+                    if (fnameCheckMatch.Success)
+                    {
+                        var filepart = fnameCheckMatch.Groups[1].Value;
+                        if (filepart.EndsWith(".") || !filepart.Contains(".")) // no extension or an empty one
+                        {
+                            extensionInvalid = true;
+                            Console.WriteLine("Info :: missing filename extension, assuming .jpg");
+                            if (filepart.EndsWith("."))
+                                filepart = filepart.Substring(0, filepart.Length - 1) + ".jpg";
+                            else
+                                filepart = filepart + ".jpg";
+                        }
+                        var filepartDotSplit = filepart.Split(new char[] { '.' });
+                        sp.FILEPART = filepart;
+                        sp.FILEPARTNE = string.Join(".", filepartDotSplit.Take(filepartDotSplit.Length - 1));
+                        sp.EXT = Utils.StripIllegalFilenameChars(filepartDotSplit.Last());
+                    }
+                    else // completely broken filenames get replaced with "unknown.jpg"
+                    {
+                        Console.WriteLine("Info :: broken filename detected, replacing with \"unknown.jpg\"");
+                        sp.FILEPART = "unknown.jpg";
+                        sp.FILEPARTNE = "unknown";
+                        sp.EXT = "jpg";
+                        extensionInvalid = true;
+                    }
+
+                    sp.FILEFULL = sp.FILEID + "." + sp.ARTIST + "_" + sp.FILEPART;
+
+                    sp.FILEFULL = Utils.StripIllegalFilenameChars(sp.FILEFULL);
+                    sp.FILEPART = Utils.StripIllegalFilenameChars(sp.FILEPART);
+                }
+                else
+                {
+                    Console.WriteLine("Error: could not make sense of the URL for submission " + subId);
+                    res.failedToDownload.Add(subId);
+                    continue;
+                }
+                #endregion
+
+                // processing submission description; also extracts submission date and title
+                {
+                    Utils.FillPropertiesFromDateTime(DateTime.Now, sp); // set Now as a fallback date
+                    sp.TITLE = "Unknown"; // fallback title
 
                     // title
                     const string key_title = @"<div class=""submission-title"">";
@@ -456,10 +515,10 @@ namespace furdown
                     // replace relative date with the absolute one
                     string sub_date_strong = "";
                     var dateMatch = Regex.Match(cpage, "<strong.+?title=\"(.+?)\" class=\"popup_date\">(.+?)<.+?</strong>", RegexOptions.CultureInvariant);
-					if (dateMatch.Success)
-					{
-						string dateMatchVal = dateMatch.Value;
-						string dateTimeStr = dateMatch.Groups[1].Value; // fixed format date
+                    if (dateMatch.Success)
+                    {
+                        string dateMatchVal = dateMatch.Value;
+                        string dateTimeStr = dateMatch.Groups[1].Value; // fixed format date
                         string dateTimeStrFuzzy = dateMatch.Groups[2].Value;
                         
                         // depending on user settings, fuzzy and fixed times may be swapped
@@ -471,25 +530,25 @@ namespace furdown
                         }
                         
                         // replace relative date with a fixed format one
-                            sub_date_strong = dateMatchVal.Replace(dateTimeStrFuzzy, dateTimeStr);
+                        sub_date_strong = dateMatchVal.Replace(dateTimeStrFuzzy, dateTimeStr);
 
                         // parse date
                         dateTimeStr = dateTimeStr.Replace(",", "");
                         {
-							const string dateFormat = "MMM d yyyy hh:mm tt";
-							try
-							{
-								DateTime dateTime = DateTime.ParseExact(dateTimeStr, dateFormat, CultureInfo.InvariantCulture);
-								Utils.FillPropertiesFromDateTime(dateTime, sp);
-							}
-							catch (Exception e)
-							{
-								Console.WriteLine("Warning :: cannot parse date :: " + e.Message);
+                            const string dateFormat = "MMM d yyyy hh:mm tt";
+                            try
+                            {
+                                DateTime dateTime = DateTime.ParseExact(dateTimeStr, dateFormat, CultureInfo.InvariantCulture);
+                                Utils.FillPropertiesFromDateTime(dateTime, sp);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("Warning :: cannot parse date :: " + e.Message);
                                 Console.WriteLine("Info :: date string :: " + dateTimeStr);
-							}
-						}
-					}
-					else Console.WriteLine("Warning :: unable to extact submission date");
+                            }
+                        }
+                    }
+                    else Console.WriteLine("Warning :: unable to extact submission date");
 
                     // extract description
                     const string key_desc = @"<div class=""submission-description user-submitted-links"">";
@@ -505,45 +564,6 @@ namespace furdown
                             <h2 class=""submission-title-header"">{{{title}}}</h2>
                             Posted {{{date}}}
                         </div><hr>".Replace("{{{title}}}", sp.TITLE).Replace("{{{date}}}", sub_date_strong) + cpage;
-                }
-
-                const string urlComponentsRegex = @"\/art\/(?<artist>.+?)\/.*?(?<curfid>\d+?)\/(?<fid>.+?)\.(?<fname>.*)$";
-                var urlCompMatch = Regex.Match(sp.URL, urlComponentsRegex);
-                if (urlCompMatch.Success)
-                {
-                    sp.ARTIST = urlCompMatch.Groups["artist"].Value;
-                    sp.CURFILEID = urlCompMatch.Groups["curfid"].Value;
-                    uint.TryParse(sp.CURFILEID, out subFid);
-                    sp.FILEID = urlCompMatch.Groups["fid"].Value;
-                    string filename = urlCompMatch.Groups["fname"].Value;
-                    const string fnameRegex = @"_(.*)\.(.+?)$";
-                    if (string.IsNullOrEmpty(filename) || !filename.Contains("_"))
-                    {
-                        filename = "";
-                    }
-                    var fnameMatch = Regex.Match(filename, fnameRegex);
-                    if (!fnameMatch.Success) // completely broken filenames get replaced with "unknown.jpg"
-                    {
-                        Console.WriteLine("Info :: broken filename detected, replacing with \"unknown.jpg\"");
-                        filename = "_unknown.jpg";
-                        fnameMatch = Regex.Match(filename, fnameRegex);
-                    }
-                    sp.FILEPARTNE = fnameMatch.Groups[1].Value;
-                    sp.EXT = fnameMatch.Groups[2].Value;
-                    if (string.IsNullOrEmpty(sp.FILEPARTNE)) // we don't want empty names; replace with "unknown"
-                    {
-                        sp.FILEPARTNE = "unknown";
-                    }
-                    sp.FILEPART = sp.FILEPARTNE + "." + sp.EXT; //v.0.4.x compat
-                    sp.FILEFULL = sp.FILEID + "." + filename;
-                    sp.FILEFULL = Utils.StripIllegalFilenameChars(sp.FILEFULL);
-                    sp.FILEPART = Utils.StripIllegalFilenameChars(sp.FILEPART);
-                }
-                else
-                {
-                    Console.WriteLine("Error: could not make sense of the URL for submission " + subId);
-                    res.failedToDownload.Add(subId);
-                    continue;
                 }
 
                 // apply template(s)
