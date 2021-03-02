@@ -207,12 +207,68 @@ namespace furdown
             };
         }
 
+        private void TryFixGalleryUrl(ref string gallery)
+        {
+            // ensure that the url starts with https://www.furaffinity.net and has no trailing `/`
+            gallery = gallery
+                .Trim(" /".ToCharArray())
+                .Replace("http://", "https://");
+            if (!gallery.StartsWith("https://"))
+                gallery = "https://" + gallery;
+            gallery = gallery
+                .Replace("https://furaffinity.net", "https://www.furaffinity.net");
+            // validate url
+            // - folder
+            var vFldMatch = Regex.Match(gallery, @"(https://www.furaffinity.net/gallery/[^/]+/folder/[0-9]+)(/[^/]+){0,1}");
+            if (vFldMatch.Success)
+            {
+                var fldVanityName = vFldMatch.Groups[2].Value;
+                gallery = vFldMatch.Groups[1].Value + (string.IsNullOrEmpty(fldVanityName) ? "/folder" : fldVanityName);
+                return;
+            }
+            // - gallery/scraps/favs
+            var vGalMatch = Regex.Match(gallery, @"https://www.furaffinity.net/(gallery|scraps|favorites)/[^/]+");
+            if (vGalMatch.Success)
+            {
+                gallery = vGalMatch.Value;
+                return;
+            }
+            // - watches / submission inbox
+            if (gallery.StartsWith("https://www.furaffinity.net/msg/submissions"))
+            {
+                gallery = "https://www.furaffinity.net/msg/submissions";
+                return;
+            }
+            // - loose submission
+            var vLooseSubMatch = Regex.Match(gallery, @"https://www.furaffinity.net/view/[0-9]+");
+            if (vLooseSubMatch.Success)
+            {
+                gallery = vLooseSubMatch.Value;
+                return;
+            }
+            // something else
+            throw new Exception(string.Format("Cannot process {0}\n"
+                + "Supported URLs are: gallery (gallery folder), "
+                + "scraps, favorites, submission, submissions inbox.", gallery));
+        }
+
         public async Task<List<string>> CreateSubmissionsListFromGallery(string gallery)
         {
+            List<string> lst = new List<string>();
+
+            // fix non-ideal links first
+            TryFixGalleryUrl(ref gallery);
+            // and handle the redundant case of a single submission link
+            if (gallery.StartsWith("https://www.furaffinity.net/view/"))
+            {
+                lst.Add(gallery.Replace("https://www.furaffinity.net/view/", ""));
+                return lst;
+            }
+
             Console.WriteLine("Building submissions list for " + gallery);
+
             string commonAttributes = (gallery.Contains("/scraps/") ? "@s" : "");
             TaskbarProgress.SetState(currentConsoleHandle, TaskbarProgress.TaskbarStates.Indeterminate);
-            List<string> lst = new List<string>();
             int page = 0;
             long favNextId = -1;
             long subInboxStamp = long.MaxValue;
