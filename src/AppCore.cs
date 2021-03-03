@@ -618,7 +618,7 @@ namespace furdown
                     var titleMatch = Regex.Match(sub_title_div, "<h2><p>(.+?)</p></h2>", RegexOptions.CultureInvariant);
                     if (titleMatch.Success)
                     {
-                        sp.TITLE = Utils.StripIllegalFilenameChars(titleMatch.Groups[1].Value);
+                        sp.TITLE = Utils.StripIllegalFilenameChars(System.Net.WebUtility.HtmlDecode(titleMatch.Groups[1].Value));
                         Console.WriteLine("Title: " + sp.TITLE);
                     }
                     else Console.WriteLine("Warning :: no submission title found!");

@@ -16,18 +16,23 @@ namespace furdown
     {
         private Form closeOnClosingThis = null;
 
-        public taskForm(Form formToClose = null, string defaultUrl = "")
+        public taskForm(Form formToClose = null, string defaultUser = "")
         {
             closeOnClosingThis = formToClose;
             InitializeComponent();
-            galleryUrlBox.Text = defaultUrl;
+            if (!string.IsNullOrEmpty(defaultUser))
+            {
+                galleryUrlBox.Items.Add(@"https://www.furaffinity.net/gallery/" + defaultUser);
+                galleryUrlBox.Items.Add(@"https://www.furaffinity.net/scraps/" + defaultUser);
+                galleryUrlBox.Items.Add(@"https://www.furaffinity.net/favorites/" + defaultUser);
+            }
+            galleryUrlBox.Items.Add(@"https://www.furaffinity.net/msg/submissions");
+            galleryUrlBox.SelectedIndex = 0;
         }
 
         /// <summary>
         /// Save new settings and apply them
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void applyNSaveBtn_Click(object sender, EventArgs e)
         {
             try

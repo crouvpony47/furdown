@@ -43,7 +43,7 @@
             this.useLinksListBtn = new System.Windows.Forms.Button();
             this.galleryDescrCheckBox = new System.Windows.Forms.CheckBox();
             this.galleryDownloadBtn = new System.Windows.Forms.Button();
-            this.galleryUrlBox = new System.Windows.Forms.TextBox();
+            this.galleryUrlBox = new System.Windows.Forms.ComboBox();
             this.settingsTab = new System.Windows.Forms.TabPage();
             this.scrapsPassTemplateLabel = new System.Windows.Forms.Label();
             this.scrapsPassTemplateBox = new System.Windows.Forms.TextBox();
@@ -609,7 +609,7 @@
         private System.Windows.Forms.TextBox downloadPathBox;
         private System.Windows.Forms.Button applyNSaveBtn;
         private System.Windows.Forms.GroupBox galleryGroupBox;
-        private System.Windows.Forms.TextBox galleryUrlBox;
+        private System.Windows.Forms.ComboBox galleryUrlBox;
         private System.Windows.Forms.Button galleryDownloadBtn;
         private System.Windows.Forms.Label descrFilenameLabel;
         private System.Windows.Forms.TextBox descrFilenameBox;
