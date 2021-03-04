@@ -418,6 +418,7 @@ namespace furdown
                 string subId;
                 uint subIdInt = 0;
                 uint subFid = 0;
+                uint subInitFid = 0;
                 bool aScraps = false;
 
                 const string subIdRegex = @"^(?<id>[0-9]+?)(#(?<fid>[0-9]+?)){0,1}(@(?<attr>.+?)){0,1}$";
@@ -444,7 +445,7 @@ namespace furdown
                     continue;
                 }
                 
-                uint dbSubId = SubmissionsDB.DB.GetFileId(subIdInt);
+                uint dbSubFid = SubmissionsDB.DB.GetFileId(subIdInt);
                 bool dbSubExists = SubmissionsDB.DB.Exists(subIdInt);
 
                 Console.WriteLine(string.Format("> Processing submission {0} {1}",
@@ -452,22 +453,22 @@ namespace furdown
                     subFid > 0 ? string.Format("(file id {0})", subFid) : ""
                 ));
 
-                // Skip submissions we have already downloaded, unless forced to or the update mode is active.
-                // Note that subFid may be zero at this point, if not provided by the user or the previous step
+                // Skip submissions that can be skipped without making any network requests
                 try
                 {
                     if (dbSubExists && GlobalSettings.Settings.downloadOnlyOnce)
                     {
-                        // if we're in the update mode, and the file id in the DB doesn't match the new one
-                        // (or both are missing), we cannot guarantee that we have the right thing
-                        if (updateMode && (dbSubId != subFid || dbSubId == 0))
-                        {
-                            Console.WriteLine("Submission is present in the DB, but may have been updated; re-checking");
-                        }
-                        else
+                        // can skip at lowest cost if either:
+                        // * not in update mode
+                        // * file ID is known and matches the one stored in the DB
+                        if ((!updateMode) || (updateMode && dbSubFid == subFid && dbSubFid != 0))
                         {
                             Console.WriteLine("Skipped (present in DB)");
                             continue;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Submission is present in the DB, but may have been updated; re-checking~");
                         }
                     }
                 }
@@ -520,7 +521,7 @@ namespace furdown
                 }
                 if (keypos < 0)
                 {
-                    Console.WriteLine("[Warning] got page, but it doesn't contain any download links.");
+                    Console.WriteLine("[Error] got page, but it doesn't contain any download links.");
                     res.failedToGetPage.Add(subId);
                     continue;
                 }
@@ -539,6 +540,7 @@ namespace furdown
                     sp.CURFILEID = urlCompMatch.Groups["curfid"].Value;
                     uint.TryParse(sp.CURFILEID, out subFid);
                     sp.FILEID = urlCompMatch.Groups["fid"].Value;
+                    uint.TryParse(sp.FILEID, out subInitFid);
                     string filename = urlCompMatch.Groups["fname"].Value;
                     /// original filename usually follows this pattern:
                     ///     $file_id.$artist_originalFileName.ext
@@ -729,48 +731,76 @@ namespace furdown
                     
                 }
 
-                Console.WriteLine("target filename: " + fname);
+                var fileExists = File.Exists(fnamefull);
 
-                // don't need to redownload if file already exists and the submission file ID (current)
-                // in the db matches the one on site
-                bool mayBeUselessDownload = false;
-                string oldFileHash = "";
-                // file exists and we're either not interested in updates, or the version in db matches the one on site
-                if (File.Exists(fnamefull) && (subFid == dbSubId || !updateMode))
+                Console.WriteLine("target filename: " + fname + (fileExists ? " (exists)" : ""));
+
+                // at this point we have the actual file ID, and can skip downloading based on that
+                if (GlobalSettings.Settings.downloadOnlyOnce)
                 {
-                    if (subFid != dbSubId)
+                    if ((!updateMode) && fileExists) // checked earlier: && !dbSubExists
                     {
-                        Console.WriteLine(string.Format(
-                            "Note :: submission {0} could've been updated, consider running this task in update mode", subId
-                            ));
-                    }
-                    SubmissionsDB.DB.AddSubmission(subIdInt);
-                    Console.WriteLine("Already exists, continuing~");
-                    continue;
-                }
-                if (updateMode)
-                {
-                    if (sp.CURFILEID == sp.FILEID && dbSubExists)
-                    {
-                        Console.WriteLine("Note :: this submission has never been updated and is present in the DB, \n"
-                                        + "adding the file ID to the DB without downloading anything.");
-                        SubmissionsDB.DB.AddSubmissionWithFileId(subIdInt, subFid);
+                        if (subInitFid != subFid)
+                        {
+                            Console.WriteLine(string.Format(
+                                "Note :: submission {0} exists locally, but could've been updated\n"
+                                + "consider running this task in update mode", subId
+                                ));
+                            SubmissionsDB.DB.AddSubmission(subIdInt);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Already exists, continuing~");
+                            SubmissionsDB.DB.AddSubmissionWithFileId(subIdInt, subFid);
+                        }
                         continue;
                     }
-                    else if (File.Exists(fnamefull))
+                    // this exact check can also be found before, it is repeated here for cases
+                    // when subFid was not known before the submission page request
+                    if (updateMode && dbSubFid == subFid && dbSubFid != 0)
                     {
-                        // versions mismatch
-                        if (dbSubId == 0)
-                        {
-                            // we have some version, but don't know which (likely a v.0.4.x download)
-                            // download the actual one, but delete if it's the same
-                            mayBeUselessDownload = true;
-                            oldFileHash = Utils.FileHash(fnamefull);
-                        }
-                        fnamefull = Path.Combine(GlobalSettings.Settings.downloadPath,
-                                                 string.Format("{1} [v.{0}].{2}", subFid, fname, sp.EXT));
+                        Console.WriteLine("Already downloaded, continuing~");
+                        continue;
                     }
                 }
+                else // not `download only once`
+                {
+                    if ((!updateMode) && fileExists)
+                    {
+                        if (subInitFid != subFid)
+                        {
+                            SubmissionsDB.DB.AddSubmission(subIdInt);
+                        }
+                        else
+                        {
+                            SubmissionsDB.DB.AddSubmissionWithFileId(subIdInt, subFid);
+                        }
+                        Console.WriteLine("Already exists, continuing~");
+                        continue;
+                    }
+                    if (updateMode && fileExists && dbSubFid == subFid && dbSubFid != 0)
+                    {
+                        Console.WriteLine("Already exists, continuing~");
+                        continue;
+                    }
+                }
+
+                // if we got here, there was no reason to skip the download
+                bool mayBeUselessDownload = false;
+                string oldFileHash = "";
+                if (fileExists)
+                {
+                    Console.WriteLine(string.Format("subfid {0}   dbsf {1}", subFid, dbSubFid));
+                    oldFileHash = Utils.FileHash(fnamefull);
+                    fnamefull = Path.Combine(GlobalSettings.Settings.downloadPath,
+                                             string.Format("{1} [v.{0}].{2}", subFid, fname, sp.EXT));
+                    if (!(subFid != dbSubFid && dbSubFid != 0))
+                    {
+                        Console.WriteLine("Info :: stored metadata is insufficient; downloading a remote file to compare aganst local");
+                        mayBeUselessDownload = true;
+                    }
+                }
+                
 
                 // download file
                 int fattempts = 3;

@@ -59,8 +59,6 @@ namespace furdown
         /// <summary>
         /// Load settings into GUI elements.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void taskForm_Shown(object sender, EventArgs e)
         {
             downloadPathBox.Text = GlobalSettings.Settings.downloadPath;
@@ -110,7 +108,7 @@ namespace furdown
             if (File.Exists(log))
             {
                 submUrlsTextBox.Lines = File.ReadAllLines(log);
-                submUrlsUpdateCheckBox.Visible = true; // v.0.5.1.2 hack
+                // submUrlsUpdateCheckBox.Visible = true; // v.0.5.1.2 hack
             }
             else
             {
@@ -147,8 +145,8 @@ namespace furdown
                 msg += " However, some files were not downloaded, those submission IDs are stored in get_sub_page_failed.log and download_failed.log";
             Show();
             MessageBox.Show(msg.Replace("{0}", pr.processedPerfectly.ToString()));
-            submUrlsUpdateCheckBox.Visible = false;
-            submUrlsUpdateCheckBox.Checked = false; // v.0.5.1.2 hack
+            //submUrlsUpdateCheckBox.Visible = false;
+            //submUrlsUpdateCheckBox.Checked = false; // v.0.5.1.2 hack
         }
 
         private void downloadPathBrowse_Click(object sender, EventArgs e)

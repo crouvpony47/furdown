@@ -135,7 +135,6 @@
             this.submUrlsUpdateCheckBox.TabIndex = 6;
             this.submUrlsUpdateCheckBox.Text = "updates check mode";
             this.submUrlsUpdateCheckBox.UseVisualStyleBackColor = true;
-            this.submUrlsUpdateCheckBox.Visible = false;
             // 
             // submUrlsDownloadBtn
             // 
@@ -226,7 +225,6 @@
             this.galleryUpdateCheckBox.TabIndex = 4;
             this.galleryUpdateCheckBox.Text = "updates check mode";
             this.galleryUpdateCheckBox.UseVisualStyleBackColor = true;
-            this.galleryUpdateCheckBox.Visible = false;
             // 
             // useLinksListBtn
             // 
@@ -269,7 +267,7 @@
             this.galleryUrlBox.Location = new System.Drawing.Point(8, 36);
             this.galleryUrlBox.Margin = new System.Windows.Forms.Padding(4);
             this.galleryUrlBox.Name = "galleryUrlBox";
-            this.galleryUrlBox.Size = new System.Drawing.Size(774, 22);
+            this.galleryUrlBox.Size = new System.Drawing.Size(774, 24);
             this.galleryUrlBox.TabIndex = 0;
             this.galleryUrlBox.Leave += new System.EventHandler(this.galleryUrlBox_Leave);
             // 

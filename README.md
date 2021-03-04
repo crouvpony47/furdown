@@ -5,10 +5,11 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.5.1.0)
-- Added: scraps galleries can now have a distinct filename pattern;
-- Fixed: better handling for HTTP 502 (and similar) errors when making a request to the CDN;
-- Added: advanced settings to help with alternative authentication scenarios (see "Advanced options" section below)
+### Changelog (v.0.5.2.0)
+- added support for downloading content from the submissions inbox (submissions from the watched artists);
+- `%SCRAPS%` value is set correctly for all submissions regardless of the URL used to produce the submissions list (previously this did not work properly for favorites);
+- fixed update mode related issues;
+- minor quality of life improvements, including: a distinct app icon, better Win7+ taskbar progress indication, autocorrecting common issues with the URLs (leaving page number in the URL, no `https://`, etc.), support for legacy download URLs parsing
 
 ### A note about CF's "I'm Under Attack" mode
 - If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
@@ -16,7 +17,9 @@ Yet another mass downloader for FurAffinity.net.
 ### System requirements
 - Windows Vista SP2 or newer, might not work on server editions
 - .NET 4.5
-- *Having IE11 installed is strongly recommended for better login experience*
+- IE11 (for systems where IE11 is not available, compile Furdown from source after adjusting `src/Program.cs:WebBrowserEmulationSet()` accordingly)
+
+IE11 requirement can be bypassed if you implement an alternative cookie provider, see "Advanced options" section below.
 
 ### Portable mode
 
