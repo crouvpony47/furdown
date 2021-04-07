@@ -339,7 +339,7 @@ namespace furdown
                 // if we're browsing favs, page numbering scheme is different
                 if (pageUrl.Contains("/favorites/"))
                 {
-                    var nextMatch = Regex.Match(cpage, @"href=""/favorites/.+?/(.+?)/next"">Next<", RegexOptions.CultureInvariant);
+                    var nextMatch = Regex.Match(cpage, @"<form.+?action=""/favorites/.+?/(.+?)/next", RegexOptions.CultureInvariant);
                     if (nextMatch.Success)
                     {
                         if (!long.TryParse(nextMatch.Groups[1].Value, out favNextId))
