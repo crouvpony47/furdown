@@ -10,6 +10,7 @@ Yet another mass downloader for FurAffinity.net.
 - `%SCRAPS%` value is set correctly for all submissions regardless of the URL used to produce the submissions list (previously this did not work properly for favorites);
 - fixed update mode related issues;
 - minor quality of life improvements, including: a distinct app icon, better Win7+ taskbar progress indication, autocorrecting common issues with the URLs (leaving page number in the URL, no `https://`, etc.), support for legacy download URLs parsing
+- v.0.5.3.0 implements a fix for a bug preventing submission inbox from being downloaded fully when the default order is set to be "Oldest first"
 
 ### A note about CF's "I'm Under Attack" mode
 - If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.

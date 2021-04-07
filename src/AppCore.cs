@@ -273,6 +273,7 @@ namespace furdown
             long favNextId = -1;
             long subInboxStamp = long.MaxValue;
             int subInboxSpp = 48;
+            string subInboxNewOld = "new";
             while (true)
             {
                 page++;
@@ -283,7 +284,7 @@ namespace furdown
                 }
                 if (subInboxStamp != long.MaxValue)
                 {
-                    pageUrl = gallery + "/new~" + subInboxStamp.ToString() + "@" + subInboxSpp.ToString() + "/";
+                    pageUrl = gallery + "/" + string.Format("{0}~{1}@{2}/", subInboxNewOld, subInboxStamp, subInboxSpp);
                 }
                 const string submIdAndFidRegex = @"figure id=""sid-(.+?)"".+?@.+?-(.+?)[.""]"; // group 1: subm id, group 2: file id
                 // get page listing submissions
@@ -357,7 +358,7 @@ namespace furdown
                 // submissions inbox
                 if (pageUrl.Contains("/msg/submissions/"))
                 {
-                    const string nextPrevBtnRe = @"<a.*?new~(.+?)@(.*?)/.*?/a>";
+                    const string nextPrevBtnRe = @"<a.*?(new|old)~(.+?)@(.*?)/.*?/a>";
                     MatchCollection npMatches = Regex.Matches(cpage, nextPrevBtnRe);
                     bool hasGoodNextPage = false;
                     foreach (Match npMatch in npMatches)
@@ -365,11 +366,17 @@ namespace furdown
                         if (!npMatch.Value.Contains("more")) continue;
                         try
                         {
-                            var subInboxStampCand = long.Parse(npMatch.Groups[1].Value);
-                            if (subInboxStampCand < subInboxStamp)
+                            var subInboxStampCand = long.Parse(npMatch.Groups[2].Value);
+                            // note: In the following condition the first branch will be used
+                            //       for the first page regardless of the newFirst/oldFirst order.
+                            //       This is intentional, since any timestamp will be < MaxInt, and
+                            //       we can thus get away with the same initial value for 'subInboxStamp'
+                            if ((subInboxNewOld == "new" && subInboxStampCand < subInboxStamp)
+                                || (subInboxNewOld == "old" && subInboxStampCand > subInboxStamp))
                             {
                                 subInboxStamp = subInboxStampCand;
-                                subInboxSpp = int.Parse(npMatch.Groups[2].Value);
+                                subInboxSpp = int.Parse(npMatch.Groups[3].Value);
+                                subInboxNewOld = npMatch.Groups[1].Value;
                                 hasGoodNextPage = true;
                             }
                         }
@@ -918,7 +925,14 @@ namespace furdown
                         {
                             List<string> subListFromUrl = null;
                             subListFromUrl = await CreateSubmissionsListFromGallery(urlFixed);
-                            if (subListFromUrl != null) subs.AddRange(subListFromUrl);
+                            if (subListFromUrl != null)
+                            {
+                                subs.AddRange(subListFromUrl);
+                                if (subListFromUrl.Count == 0)
+                                {
+                                    Console.WriteLine("Note :: no submissions found for " + urlFixed);
+                                }
+                            }
                         }
                     }
                     TaskbarProgress.UnlockState();
