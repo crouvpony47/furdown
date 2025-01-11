@@ -27,15 +27,27 @@ namespace furdown
             // initialize WebView2 fully
             await edgeWebView.EnsureCoreWebView2Async(null);
             // initialize request interception
-            edgeWebView.CoreWebView2.AddWebResourceRequestedFilter(
-                  "https://www.furaffinity.net/*",
-                  CoreWebView2WebResourceContext.Document,
-                  CoreWebView2WebResourceRequestSourceKinds.All);
+            try
+            {
+                edgeWebView.CoreWebView2.AddWebResourceRequestedFilter(
+                      "https://www.furaffinity.net/*",
+                      CoreWebView2WebResourceContext.Document,
+                      CoreWebView2WebResourceRequestSourceKinds.All);
+            }
+            catch (Exception)
+            {
+                // fallback to an older (deprecated) filter interface
+                // for legacy WebView versions (i.e. v.109 on Win 7)
+                edgeWebView.CoreWebView2.AddWebResourceRequestedFilter(
+                      "https://www.furaffinity.net/*",
+                      CoreWebView2WebResourceContext.Document);
+            }
             edgeWebView.CoreWebView2.WebResourceRequested += async delegate (
                object _sender, CoreWebView2WebResourceRequestedEventArgs args)
             {
                 var uri = new Uri(args.Request.Uri);
-                if (uri.AbsolutePath.ToString() == "/" || uri.AbsolutePath.ToString().StartsWith("/user"))
+                if (uri.AbsolutePath.ToString() == "/" || uri.AbsolutePath.ToString().StartsWith("/user")
+                    || (uri.AbsolutePath.ToString().StartsWith("/login") && uri.Query.ToString().Contains("__cf")))
                 {
                     CoreWebView2HttpRequestHeaders requestHeaders = args.Request.Headers;
                     if (requestHeaders.Contains("Cookie"))
@@ -67,6 +79,11 @@ namespace furdown
 
         private void OnAuthSuccessful()
         {
+            if (BackgroundMode)
+            {
+                Close();
+                return;
+            }
             Hide();
             taskForm tf = new taskForm(this, AppCore.Core.defaultUserId);
             tf.Show();
@@ -99,6 +116,11 @@ namespace furdown
             else
             {
                 Console.WriteLine("Does not seem to be authorized (or need to pass CF validation)...");
+                if (BackgroundMode)
+                {
+                    Close();
+                    return;
+                }
 
                 // set up a new login callback
                 onShouldValidateCookies = async delegate ()
@@ -160,7 +182,13 @@ namespace furdown
         private void authForm_Load(object sender, EventArgs e)
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+            if (BackgroundMode)
+            {
+                WindowState = FormWindowState.Minimized;
+            }
         }
+
+        public bool BackgroundMode = false;
 
         delegate Task CookieValidationCallback();
         private CookieValidationCallback onShouldValidateCookies = null;

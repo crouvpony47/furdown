@@ -21,6 +21,7 @@ namespace furdown
             var args = Environment.GetCommandLineArgs();
             if (args.Count() < 2 || args[1] != "-b")
             {
+                // GUI mode
                 if (args.Count() >= 2)
                 {
                     Console.WriteLine("Note: found some invalid command line arguments");
@@ -28,13 +29,27 @@ namespace furdown
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                var af = new authForm();
-                Application.Run(af);
+                Application.Run(new authForm());
             }
             else
             {
-                bool AuthRes = AppCore.Core.Init().Result;
-                if (!AuthRes)
+                // batch mode
+                bool hasEnvCookies = (Environment.GetEnvironmentVariable("FURDOWN_COOKIES") != null);
+                bool authRes = false;
+                if (hasEnvCookies)
+                {
+                    authRes  = AppCore.Core.Init().Result;
+                }
+                else
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    var aForm = new authForm();
+                    aForm.BackgroundMode = true;
+                    Application.Run(aForm);
+                    authRes = AppCore.Core.isInitialized;
+                }
+                if (!authRes)
                 {
                     Console.WriteLine("Not authorized! Log in at least once using GUI first.");
                     Console.WriteLine("Alternatively, provide the 'cookie' and 'user-agent' header values");

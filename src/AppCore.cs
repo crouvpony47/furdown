@@ -45,16 +45,6 @@ namespace furdown
         public bool isInitialized = false;
 
         /// <summary>
-        /// Gets all, including http-only, cookies from WebBrowser component
-        /// </summary>
-        /// <param name="uri">URI which is used to get the cookies for</param>
-        /// <returns></returns>
-        private static string GetGlobalCookies(string uri) //fixme
-        {
-            return CookiesStorage.GetCookieString();
-        }
-
-        /// <summary>
         /// Reads network stream to another stream, throwing excepton if no data was received in reasonable time
         /// </summary>
         /// <param name="from">Readable network stream to copy data from</param>
@@ -153,6 +143,7 @@ namespace furdown
                         {
                             Console.WriteLine("Warning :: could not determine the username to use for the default target gallery url");
                         }
+                        isInitialized = true;
                         return true;
                     }
                     else

@@ -5,18 +5,18 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.5.5.0)
-- adapt to site changes
+### Changelog (v.2.0.1.0)
+- Switched to Edge-based embedded browser for authentification and human verification.
 
 ### A note about CF's "I'm Under Attack" mode
-- If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
+- If you are already logged in but are shown the login form anyway, simply navigate to the FA front page.
 
 ### System requirements
-- Windows 7 or newer, might not work on server editions
-- .NET 4.6.2
-- IE11 (for systems where IE11 is not available, compile Furdown from source after adjusting `src/Program.cs:WebBrowserEmulationSet()` accordingly)
+- Windows 7 SP1, 8.1, or 10+. Windows 10 or 11 recommended.
+- .NET Framework 4.6.2
+- Microsoft Edge WebView2 (usually preinstalled on Windows 10 or newer)
 
-IE11 requirement can be bypassed if you implement an alternative cookie provider, see "Advanced options" section below.
+Edge WebView2 requirement can be bypassed if you implement an alternative cookie provider, see "Advanced options" section below.
 
 ### Portable mode
 
@@ -66,7 +66,7 @@ Override descriptions naming template with TMPLT. __*__
 __*__ As templates use the syntax much like that used for environment variables, you may get unexpected results if, say, %FILEPART% is an existing variable.
 
 **Other notes**:
-- You must login in GUI mode at least once before using batch/CLI mode.
+- You must login in GUI mode at least once before using batch/CLI mode unless the cookies/user-agent are provided using the environment variables.
 - For non-overridden parameters the value from a current configuration file (the same file used in GUI mode) is used.
 
 **Examples**:
@@ -78,6 +78,6 @@ Note that `%` might need to be escaped as `%%` in batch scripts.
 
 ### Advanced options
 
-The builtin authentication mechanism based on the embedded Internet Explorer can be bypassed by setting FURDOWN_COOKIES and FURDOWN_USERAGENT environment variables to the appropriate values. If only FURDOWN_USERAGENT is set, furdown and its embedded IE will use the User-Agent value provided, and if only FURDOWN_COOKIES is set, it is your responsibility to match the User-Agent of the cookies source and the one used by furdown.
+The builtin authentication mechanism based on the embedded Edge can be bypassed by setting `FURDOWN_COOKIES` and `FURDOWN_USERAGENT` environment variables to the appropriate values. Setting just the `FURDOWN_USERAGENT` has no effect.
 
-Note that the FURDOWN_COOKIES is expected to contain the entire cookie header value (something like `b=XXX; __gads=XXX; a=XXX; s=XXX; __qca=XXX; sz=XXX; cc=XXX; __cfduid=XXX` where `XXX`s are some values)
+Note that the `FURDOWN_COOKIES` is expected to contain the entire cookie header value (something like `b=XXX; __gads=XXX; a=XXX; s=XXX; __qca=XXX; sz=XXX; cc=XXX; __cfduid=XXX` where `XXX`s are some values)
