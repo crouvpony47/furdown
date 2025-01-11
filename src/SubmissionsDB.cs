@@ -71,6 +71,7 @@ namespace furdown
 
         public void Clear()
         {
+            DB.fileids.Clear();
             DB.database.Clear();
             Save();
         }

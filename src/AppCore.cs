@@ -113,7 +113,7 @@ namespace furdown
 
             // welcome thing
             Console.WriteLine(@"furdown " + Assembly.GetEntryAssembly().GetName().Version);
-            Console.WriteLine(@"<github.com/crouvpony47> <crouvpony47.itch.io>");
+            Console.WriteLine(@"<https://github.com/crouvpony47> <https://crouvpony47.itch.io>");
             // initialize http client
             httph = new HttpClientHandler();
             httph.AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate;
@@ -310,9 +310,15 @@ namespace furdown
                 int counter = 0;
                 do
                 {
-                    var nextMatch = Regex.Match(cpage, submIdAndFidRegex, RegexOptions.CultureInvariant);
+                    var nextMatch = Regex.Match(cpage, submIdAndFidRegex, RegexOptions.CultureInvariant | RegexOptions.Singleline);
                     if (nextMatch.Success)
                     {
+                        if (nextMatch.Groups[0].Value.Contains("</figure"))
+                        {
+                            Console.WriteLine("Error :: unexpected match.");
+                            Console.WriteLine("Please report this issue on GitHub: https://github.com/crouvpony47/furdown/issues");
+                            continue;
+                        }
                         uint sid = 0, fid = 0;
                         if (!uint.TryParse(nextMatch.Groups[1].Value, out sid))
                         {
@@ -715,7 +721,10 @@ namespace furdown
                 try
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(fnamefull));
-                    Directory.CreateDirectory(Path.GetDirectoryName(dfnamefull));
+                    if (needDescription)
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(dfnamefull));
+                    }
                 }
                 catch
                 {

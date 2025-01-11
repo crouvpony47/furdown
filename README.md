@@ -5,19 +5,15 @@ Yet another mass downloader for FurAffinity.net.
 
 [Download stable win32 builds.](https://github.com/crouvpony47/furdown/releases)
 
-### Changelog (v.0.5.2.0)
-- added support for downloading content from the submissions inbox (submissions from the watched artists);
-- `%SCRAPS%` value is set correctly for all submissions regardless of the URL used to produce the submissions list (previously this did not work properly for favorites);
-- fixed update mode related issues;
-- minor quality of life improvements, including: a distinct app icon, better Win7+ taskbar progress indication, autocorrecting common issues with the URLs (leaving page number in the URL, no `https://`, etc.), support for legacy download URLs parsing
-- v.0.5.3.0 implements a fix for a bug preventing submission inbox from being downloaded fully when the default order is set to be "Oldest first"
+### Changelog (v.0.5.5.0)
+- adapt to site changes
 
 ### A note about CF's "I'm Under Attack" mode
 - If you are already logged in but are shown the login form anyway, simply navigate to the FA main page.
 
 ### System requirements
-- Windows Vista SP2 or newer, might not work on server editions
-- .NET 4.5
+- Windows 7 or newer, might not work on server editions
+- .NET 4.6.2
 - IE11 (for systems where IE11 is not available, compile Furdown from source after adjusting `src/Program.cs:WebBrowserEmulationSet()` accordingly)
 
 IE11 requirement can be bypassed if you implement an alternative cookie provider, see "Advanced options" section below.
@@ -27,7 +23,7 @@ IE11 requirement can be bypassed if you implement an alternative cookie provider
 To leave no traces in ApplicationData directory you can create an empty file called `furdown-portable.conf` in the working directory, it will then be used as a settings storage file instead of the default `%AppData%\furdown\furdown.conf`.
 
 ### Batch/CLI mode
-v.0.3.6 has a basic support for being run within a batch script, or from a terminal.
+v.0.3.6 adds a basic support for being run within a batch script, or from a terminal.
 
 For that `-b` must be passed as the first argument, followed by a combination of one or more arguments:
 
