@@ -34,29 +34,15 @@ namespace furdown
             }
         }
 
-        public class EmbeddedIeUtils
+        public static void OpenUrl(string urlToOpen)
         {
-            [DllImport("urlmon.dll", CharSet = CharSet.Ansi)]
-            private static extern int UrlMkSetSessionOption(int dwOption, string pBuffer, int dwBufferLength, int dwReserved);
-
-            const int URLMON_OPTION_USERAGENT = 0x10000001;
-            const string ua = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko";
-
-            static string GetUserAgent()
+            try
             {
-                string envUa = Environment.GetEnvironmentVariable("FURDOWN_USERAGENT");
-                return envUa == null ? ua : envUa;
+                System.Diagnostics.Process.Start(urlToOpen);
             }
-
-            public static void SetKnownUserAgent()
+            catch (Exception)
             {
-                var userAgent = GetUserAgent();
-                UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, userAgent, userAgent.Length, 0);
-            }
-
-            public static string GetKnownUserAgentValue()
-            {
-                return GetUserAgent();
+                Console.WriteLine("Could not open URL in the default browser:\n" + urlToOpen);
             }
         }
     }

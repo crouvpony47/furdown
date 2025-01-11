@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Web.WebView2.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Net.WebRequestMethods;
 
 namespace furdown
 {
@@ -15,42 +17,129 @@ namespace furdown
         public authForm()
         {
             InitializeComponent();
+            edgeWebView.Visible = false;
         }
 
-        void OnAuthSuccessful()
+        // Sets up WebView and its listener, and performs an initial cookie extraction attempt.
+        // Returns true if login validated successfully.
+        public async Task<bool> Start()
+        {
+            // initialize WebView2 fully
+            await edgeWebView.EnsureCoreWebView2Async(null);
+            // initialize request interception
+            edgeWebView.CoreWebView2.AddWebResourceRequestedFilter(
+                  "https://www.furaffinity.net/*",
+                  CoreWebView2WebResourceContext.Document,
+                  CoreWebView2WebResourceRequestSourceKinds.All);
+            edgeWebView.CoreWebView2.WebResourceRequested += async delegate (
+               object _sender, CoreWebView2WebResourceRequestedEventArgs args)
+            {
+                var uri = new Uri(args.Request.Uri);
+                if (uri.AbsolutePath.ToString() == "/" || uri.AbsolutePath.ToString().StartsWith("/user"))
+                {
+                    CoreWebView2HttpRequestHeaders requestHeaders = args.Request.Headers;
+                    if (requestHeaders.Contains("Cookie"))
+                    {
+                        CookiesStorage.SetCookieString(requestHeaders.GetHeader("Cookie"));
+                        CookiesStorage.SetAssociatedUserAgent(requestHeaders.GetHeader("User-Agent"));
+                    }
+                    if (onShouldValidateCookies != null)
+                    {
+                        await onShouldValidateCookies();
+                    }
+                }
+            };
+
+            var tcs = new TaskCompletionSource<bool>();
+            onShouldValidateCookies = async delegate ()
+            {
+                bool authRes = await AppCore.Core.Init();
+                tcs.TrySetResult(authRes);
+            };
+
+            // navigate to the front page, this will also trigger cookie validation
+            edgeWebView.Source = new Uri("https://www.furaffinity.net/");
+
+            var result = await tcs.Task;
+            onShouldValidateCookies = null;
+            return result;
+        }
+
+        private void OnAuthSuccessful()
         {
             Hide();
             taskForm tf = new taskForm(this, AppCore.Core.defaultUserId);
             tf.Show();
         }
 
+        private async void WebViewLoginFlow()
+        {
+            try
+            {
+                Console.WriteLine("WebView2 version: " + CoreWebView2Environment.GetAvailableBrowserVersionString());
+            }
+            catch (WebView2RuntimeNotFoundException)
+            {
+                const string wv2downloadUrl = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
+                var dlgResult = MessageBox.Show("WebView2 runtime is required, but was not found!\n"
+                    + "Open download page now?", "Missing Component", MessageBoxButtons.YesNo);
+                if (dlgResult == DialogResult.Yes)
+                {
+                    Utils.OpenUrl(wv2downloadUrl);
+                }
+                Close();
+            }
+
+            var authResult = await Start();
+
+            if (authResult) // stored cookies were sufficient
+            {
+                OnAuthSuccessful();
+            }
+            else
+            {
+                Console.WriteLine("Does not seem to be authorized (or need to pass CF validation)...");
+
+                // set up a new login callback
+                onShouldValidateCookies = async delegate ()
+                {
+                    bool authRes = await AppCore.Core.Init();
+                    if (authRes)
+                    {
+                        OnAuthSuccessful();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unsuccessfull login attempt!");
+                    }
+                };
+
+                edgeWebView.Source = new Uri("https://www.furaffinity.net/login/");
+                loadingLabel.SendToBack();
+                loadingLabel.Hide();
+                edgeWebView.Visible = true;
+            }
+        }
+
         private async void authForm_Shown(object sender, EventArgs e)
         {
-            // set 'splash' text to appear while the cookies are checked at startup
-            authWebBrowser.Navigate("about:blank");
-            if (authWebBrowser.Document != null)
-                authWebBrowser.Document.Write(string.Empty);
-            authWebBrowser.DocumentText = "<body>Validating cookies...</body>";
-            // validate cookies already present in system
-            bool AuthRes = await AppCore.Core.Init();
-            if (!AuthRes)
+            string envCookies = Environment.GetEnvironmentVariable("FURDOWN_COOKIES");
+            if (envCookies != null)
             {
-                if (Environment.GetEnvironmentVariable("FURDOWN_COOKIES") == null)
+                bool authRes = await AppCore.Core.Init();
+                if (authRes)
                 {
-                    Console.WriteLine("Does not seem to be authorized (or need to pass CF validation)...");
-                    authWebBrowser.Navigate("https://www.furaffinity.net/login/");
+                    OnAuthSuccessful();
                 }
                 else
                 {
-                    MessageBox.Show("FURDOWN_COOKIES environment variable is set, but the cookies provided " +
-                                    "could not be used to authenticate the user. Please set a valid value " +
-                                    "or unset FURDOWN_COOKIES to use the default login mechanism.");
+                    Console.WriteLine("FURDOWN_COOKIES found, but the provided cookies and User-Agent were not sufficient to log in!");
                     Close();
                 }
             }
             else
             {
-                OnAuthSuccessful();
+                WebViewLoginFlow();
             }
 
             // check for updates
@@ -63,33 +152,7 @@ namespace furdown
                                                 MessageBoxButtons.YesNo);
                 if (dlgResult == DialogResult.Yes)
                 {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(urlToOpen);
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Could not open URL in the default browser:\n" + urlToOpen);
-                    }
-                }
-            }
-        }
-
-        private async void authWebBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
-        {
-            //Console.WriteLine(e.Url.AbsolutePath.ToString());
-            
-            // redirected to the title page
-            if (e.Url.AbsolutePath.ToString().CompareTo("/") == 0)
-            {
-                bool AuthRes = await AppCore.Core.Init();
-                if (AuthRes)
-                {
-                    OnAuthSuccessful();
-                }
-                else
-                {
-                    Console.WriteLine(string.Format("Unsuccessfull login attempt!"));
+                    Utils.OpenUrl(urlToOpen);
                 }
             }
         }
@@ -98,5 +161,8 @@ namespace furdown
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
         }
+
+        delegate Task CookieValidationCallback();
+        private CookieValidationCallback onShouldValidateCookies = null;
     }
 }

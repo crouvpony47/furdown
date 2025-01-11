@@ -28,39 +28,54 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.authWebBrowser = new System.Windows.Forms.WebBrowser();
+            this.edgeWebView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            this.loadingLabel = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.edgeWebView)).BeginInit();
             this.SuspendLayout();
             // 
-            // authWebBrowser
+            // edgeWebView
             // 
-            this.authWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.authWebBrowser.Location = new System.Drawing.Point(0, 0);
-            this.authWebBrowser.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.authWebBrowser.MinimumSize = new System.Drawing.Size(27, 25);
-            this.authWebBrowser.Name = "authWebBrowser";
-            this.authWebBrowser.ScriptErrorsSuppressed = true;
-            this.authWebBrowser.Size = new System.Drawing.Size(1045, 506);
-            this.authWebBrowser.TabIndex = 0;
-            this.authWebBrowser.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.authWebBrowser_Navigated);
+            this.edgeWebView.AllowExternalDrop = false;
+            this.edgeWebView.CreationProperties = null;
+            this.edgeWebView.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.edgeWebView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.edgeWebView.Location = new System.Drawing.Point(0, 0);
+            this.edgeWebView.Name = "edgeWebView";
+            this.edgeWebView.Size = new System.Drawing.Size(1176, 632);
+            this.edgeWebView.TabIndex = 0;
+            this.edgeWebView.ZoomFactor = 1D;
+            // 
+            // loadingLabel
+            // 
+            this.loadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.loadingLabel.Location = new System.Drawing.Point(0, 0);
+            this.loadingLabel.Name = "loadingLabel";
+            this.loadingLabel.Size = new System.Drawing.Size(1176, 632);
+            this.loadingLabel.TabIndex = 1;
+            this.loadingLabel.Text = "validating saved cookies...";
+            this.loadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // authForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1045, 506);
-            this.Controls.Add(this.authWebBrowser);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ClientSize = new System.Drawing.Size(1176, 632);
+            this.Controls.Add(this.loadingLabel);
+            this.Controls.Add(this.edgeWebView);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "authForm";
             this.Text = "furdown :: authorization";
             this.Load += new System.EventHandler(this.authForm_Load);
             this.Shown += new System.EventHandler(this.authForm_Shown);
+            ((System.ComponentModel.ISupportInitialize)(this.edgeWebView)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.WebBrowser authWebBrowser;
+        private Microsoft.Web.WebView2.WinForms.WebView2 edgeWebView;
+        private System.Windows.Forms.Label loadingLabel;
     }
 }
 

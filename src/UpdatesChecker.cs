@@ -46,7 +46,14 @@ namespace furdown
                     var remoteVersion = tag.Split('.');
                     var versionComp = thisVersion.Zip(remoteVersion, (tvp, rvp) =>
                     {
-                        return string.Compare(tvp, rvp, StringComparison.Ordinal);
+                        try
+                        {
+                            return int.Parse(tvp) - int.Parse(rvp);
+                        }
+                        catch (Exception)
+                        {
+                            return string.Compare(tvp, rvp, StringComparison.Ordinal);
+                        }
                     });
 
                     foreach (int c in versionComp)

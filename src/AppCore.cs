@@ -38,41 +38,20 @@ namespace furdown
         #region HTTP-related members
         private HttpClientHandler httph = null;
         private HttpClient http = null;
-        #if !furdown_portable_core
-        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref uint pcchCookieData, int dwFlags, IntPtr lpReserved);
-        #endif
-        private const int INTERNET_COOKIE_HTTPONLY = 0x00002000;
         #endregion
 
         public string defaultUserId = "";
+
+        public bool isInitialized = false;
 
         /// <summary>
         /// Gets all, including http-only, cookies from WebBrowser component
         /// </summary>
         /// <param name="uri">URI which is used to get the cookies for</param>
         /// <returns></returns>
-        private static string GetGlobalCookies(string uri)
+        private static string GetGlobalCookies(string uri) //fixme
         {
-            string envCookies = Environment.GetEnvironmentVariable("FURDOWN_COOKIES");
-            if (envCookies != null) return envCookies;
-
-            #if !furdown_portable_core
-            uint datasize = 1024;
-            StringBuilder cookieData = new StringBuilder((int)datasize);
-            if (InternetGetCookieEx(
-                uri, null, cookieData, ref datasize, INTERNET_COOKIE_HTTPONLY, IntPtr.Zero
-            ) && cookieData.Length > 0)
-            {
-                return cookieData.ToString();
-            }
-            else
-            {
-                return null;
-            }
-            #else
-            return null;
-            #endif
+            return CookiesStorage.GetCookieString();
         }
 
         /// <summary>
@@ -142,15 +121,15 @@ namespace furdown
         public async Task<bool> Init()
         {
             Console.WriteLine("Checking authorization...");
-            string cookies = GetGlobalCookies("https://www.furaffinity.net/");
+            string cookies = CookiesStorage.GetCookieString();
             if (cookies == null) return false;
             Console.WriteLine("Found some cookies.");
             // Console.WriteLine("Found cookies: "+cookies);
             try
             {
                 http.DefaultRequestHeaders.Clear();
-                // IE's and HttpClient's UAs MUST match for Cloudflare to recognize us
-                http.DefaultRequestHeaders.Add("User-Agent", Utils.EmbeddedIeUtils.GetKnownUserAgentValue());
+                // WebView's and HttpClient's UAs MUST match for Cloudflare to recognize us
+                http.DefaultRequestHeaders.Add("User-Agent", CookiesStorage.GetAssociatedUserAgent());
                 // test:  "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"
                 //http.DefaultRequestHeaders.Add("Accept-Language", "en-US;q=0.8,en;q=0.5,ja;q=0.3"); // not strictly neccessary
                 http.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
