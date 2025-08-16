@@ -50,9 +50,21 @@ namespace furdown
                     || (uri.AbsolutePath.ToString().StartsWith("/login") && uri.Query.ToString().Contains("__cf")))
                 {
                     CoreWebView2HttpRequestHeaders requestHeaders = args.Request.Headers;
-                    if (requestHeaders.Contains("Cookie"))
+                    var cookies = await edgeWebView.CoreWebView2.CookieManager.GetCookiesAsync("https://www.furaffinity.net");
+                    if (cookies.Count > 0)
                     {
-                        CookiesStorage.SetCookieString(requestHeaders.GetHeader("Cookie"));
+                        var cookieString = new StringBuilder();
+                        foreach (var cookie in cookies)
+                        {
+                            cookieString.Append(cookie.Name + "=" + cookie.Value + "; ");
+                        }
+                        cookieString.Remove(cookieString.Length - 2, 2);
+                        // Console.WriteLine("Cookies: " + cookieString.ToString());
+                        Console.WriteLine("Extracted " + cookies.Count.ToString() + " cookies.");
+                        CookiesStorage.SetCookieString(cookieString.ToString());
+                    }
+                    if (requestHeaders.Contains("User-Agent"))
+                    {
                         CookiesStorage.SetAssociatedUserAgent(requestHeaders.GetHeader("User-Agent"));
                     }
                     if (onShouldValidateCookies != null)
