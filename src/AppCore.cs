@@ -610,7 +610,7 @@ namespace furdown
 
                     // replace relative date with the absolute one
                     string sub_date_strong = "";
-                    var dateMatch = Regex.Match(cpage, "<strong.+?title=\"(.+?)\" class=\"popup_date\">(.+?)<.+?</strong>", RegexOptions.CultureInvariant);
+                    var dateMatch = Regex.Match(cpage, "<strong.+?class=\"popup_date\" title=\"(.+?)\">(.+?)<.+?</strong>", RegexOptions.CultureInvariant);
                     if (dateMatch.Success)
                     {
                         string dateMatchVal = dateMatch.Value;
@@ -618,7 +618,7 @@ namespace furdown
                         string dateTimeStrFuzzy = dateMatch.Groups[2].Value;
                         
                         // depending on user settings, fuzzy and fixed times may be swapped
-                        if (dateTimeStrFuzzy.Contains(" PM") || dateTimeStrFuzzy.Contains(" AM"))
+                        if (dateTimeStr.Contains(" ago"))
                         {
                             var temporary = dateTimeStr;
                             dateTimeStr = dateTimeStrFuzzy;
@@ -631,7 +631,7 @@ namespace furdown
                         // parse date
                         dateTimeStr = dateTimeStr.Replace(",", "");
                         {
-                            const string dateFormat = "MMM d yyyy hh:mm tt";
+                            const string dateFormat = "MMMM d yyyy HH:mm:ss";
                             try
                             {
                                 DateTime dateTime = DateTime.ParseExact(dateTimeStr, dateFormat, CultureInfo.InvariantCulture);
@@ -678,10 +678,12 @@ namespace furdown
                     {
                         fname = fname.Replace("%" + fi.Name + "%", (string)fi.GetValue(sp));
                         dfname = dfname.Replace("%" + fi.Name + "%", (string)fi.GetValue(sp));
-#if DEBUG_PRINT_ALL_TEMPLATE_VALS
-                        // debug only: output all template values:
-                        Console.WriteLine(string.Format("+++ {0} = {1}", "%" + fi.Name + "%", (string)fi.GetValue(sp)));
-#endif
+                        if (Environment.GetEnvironmentVariable("FURDOWN_VERBOSE") != null) {
+                            // debug only: output all template values:
+                            Console.WriteLine(string.Format("   {0} = {1}",
+                                "%" + fi.Name + "%",
+                                (string)fi.GetValue(sp)));
+                        }
                     }
                 }
 
@@ -708,7 +710,7 @@ namespace furdown
                     try
                     {
                         File.WriteAllText(dfnamefull, cpage);
-                        Console.WriteLine("description saved to filename:" + dfname);
+                        Console.WriteLine("description saved to filename: " + dfname);
                     }
                     catch (Exception E)
                     {

@@ -14,12 +14,13 @@ namespace furdown
         public string FILEPARTNE;
         public string EXT;
 
-		public string TITLE;
+        public string TITLE;
 
-		public string PDYEAR;
-		public string PDMON;
-		public string PDDAY;
-		public string PDHOUR;
-		public string PDMIN;
+        public string PDYEAR;
+        public string PDMON;
+        public string PDDAY;
+        public string PDHOUR;
+        public string PDMIN;
+        public string PDSEC;
     }
 }
