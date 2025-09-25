@@ -610,39 +610,39 @@ namespace furdown
 
                     // replace relative date with the absolute one
                     string sub_date_strong = "";
-                    var dateMatch = Regex.Match(cpage, "<strong.+?class=\"popup_date\" title=\"(.+?)\">(.+?)<.+?</strong>", RegexOptions.CultureInvariant);
+                    var dateMatch = Regex.Match(cpage, "<strong.+?class=\"popup_date\".+data-time=\"(.+?)\".+?</strong>", RegexOptions.CultureInvariant);
                     if (dateMatch.Success)
                     {
                         string dateMatchVal = dateMatch.Value;
-                        string dateTimeStr = dateMatch.Groups[1].Value; // fixed format date
-                        string dateTimeStrFuzzy = dateMatch.Groups[2].Value;
-                        
-                        // depending on user settings, fuzzy and fixed times may be swapped
-                        if (dateTimeStr.Contains(" ago"))
+                        string dateTimeUnixTimeStr = dateMatch.Groups[1].Value;
+                        try
                         {
-                            var temporary = dateTimeStr;
-                            dateTimeStr = dateTimeStrFuzzy;
-                            dateTimeStrFuzzy = temporary;
+                            var dateTimeUnixTime = Int64.Parse(dateTimeUnixTimeStr);
+                            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                            DateTime dateTime = epoch.AddSeconds(dateTimeUnixTime);
+                            Utils.FillPropertiesFromDateTime(dateTime, sp);
                         }
-                        
-                        // replace relative date with a fixed format one
-                        sub_date_strong = dateMatchVal.Replace(dateTimeStrFuzzy, dateTimeStr);
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Warning :: cannot parse date :: " + e.Message);
+                            Console.WriteLine("Info :: timestamp :: " + dateTimeUnixTimeStr);
+                        }
 
-                        // parse date
-                        dateTimeStr = dateTimeStr.Replace(",", "");
-                        {
-                            const string dateFormat = "MMMM d yyyy HH:mm:ss";
-                            try
+                        var humanReadableDateMatch = Regex.Match(dateMatchVal, "title=\"(.+?)\".*?>(.+?)</", RegexOptions.CultureInvariant);
+                        if (humanReadableDateMatch.Success) {
+                            string dateTimeStr = humanReadableDateMatch.Groups[1].Value;
+                            string dateTimeStrFuzzy = humanReadableDateMatch.Groups[2].Value;
+                            // depending on user settings, fuzzy and fixed times may be swapped
+                            if (dateTimeStr.Contains(" ago"))
                             {
-                                DateTime dateTime = DateTime.ParseExact(dateTimeStr, dateFormat, CultureInfo.InvariantCulture);
-                                Utils.FillPropertiesFromDateTime(dateTime, sp);
+                                var temporary = dateTimeStr;
+                                dateTimeStr = dateTimeStrFuzzy;
+                                dateTimeStrFuzzy = temporary;
                             }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine("Warning :: cannot parse date :: " + e.Message);
-                                Console.WriteLine("Info :: date string :: " + dateTimeStr);
-                            }
+                            // replace relative date with a fixed format one
+                            sub_date_strong = dateMatchVal.Replace(dateTimeStrFuzzy, dateTimeStr);
                         }
+                        else Console.WriteLine("Warning :: unable to extact human-readable submission date");
                     }
                     else Console.WriteLine("Warning :: unable to extact submission date");
 
