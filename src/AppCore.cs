@@ -488,30 +488,30 @@ namespace furdown
 
                 // process submission page
                 var downbtnkeys = new string[]{
-                    "<a href=\"//d.facdn.net/", "<a href=\"//d2.facdn.net/",
-                    "<a href=\"//d.furaffinity.net/"
+                    @"<a[^>]+? href=\""(\/\/d\.facdn\.net\/[^""]+)",
+                    @"<a[^>]+? href=\""(\/\/d2\.facdn\.net\/[^""]+)",
+                    @"<a[^>]+? href=\""(\/\/d\.furaffinity\.net\/[^""]+)"
                 };
                 SubmissionProps sp = new SubmissionProps();
                 sp.SUBMID = subId;
-                int keypos = -1;
+                bool urlFound = false;
                 foreach (var downbtnkey in downbtnkeys)
                 {
-                    keypos = cpage.IndexOf(downbtnkey, StringComparison.Ordinal);
-                    if (keypos >= 0)
+                    var match = Regex.Match(cpage, downbtnkey, RegexOptions.CultureInvariant);
+                    if (match.Success)
                     {
+                        cpage = cpage.Substring(match.Groups[1].Index);
+                        urlFound = true;
                         break;
                     }
                 }
-                if (keypos < 0)
+                if (!urlFound)
                 {
                     Console.WriteLine("[Error] got page, but it doesn't contain any download links.");
                     res.failedToGetPage.Add(subId);
                     continue;
                 }
-                cpage = cpage.Substring(keypos);
-                cpage = cpage.Substring(cpage.IndexOf("/", StringComparison.Ordinal));
-                sp.URL = "https:"
-                    + cpage.Substring(0, cpage.IndexOf("\"", StringComparison.Ordinal));
+                sp.URL = "https:" + cpage.Substring(0, cpage.IndexOf("\"", StringComparison.Ordinal));
 
                 #region download URL parsing
                 bool extensionInvalid = false; // future use, possibly come up with an extension that makes sense on a case by case basis
@@ -600,17 +600,17 @@ namespace furdown
                     string sub_title_div = cpage.Substring(0,
                                                            cpage.IndexOf(key_enddiv, cpage.IndexOf(key_enddiv, StringComparison.Ordinal) + 1,
                                                                          StringComparison.Ordinal) + key_enddiv.Length);
-                    var titleMatch = Regex.Match(sub_title_div, "<h2><p>(.+?)</p></h2>", RegexOptions.CultureInvariant);
+                    var titleMatch = Regex.Match(sub_title_div, "<h2>(.+?)</h2>", RegexOptions.CultureInvariant | RegexOptions.Singleline);
                     if (titleMatch.Success)
                     {
-                        sp.TITLE = Utils.StripIllegalFilenameChars(System.Net.WebUtility.HtmlDecode(titleMatch.Groups[1].Value));
+                        sp.TITLE = Utils.StripIllegalFilenameChars(System.Net.WebUtility.HtmlDecode(titleMatch.Groups[1].Value).Trim());
                         Console.WriteLine("Title: " + sp.TITLE);
                     }
                     else Console.WriteLine("Warning :: no submission title found!");
 
                     // replace relative date with the absolute one
                     string sub_date_strong = "";
-                    var dateMatch = Regex.Match(cpage, "<strong.+?class=\"popup_date\".+data-time=\"(.+?)\".+?</strong>", RegexOptions.CultureInvariant);
+                    var dateMatch = Regex.Match(cpage, "<[^>]+?class=\"popup_date\".+data-time=\"(.+?)\".+?</", RegexOptions.CultureInvariant);
                     if (dateMatch.Success)
                     {
                         string dateMatchVal = dateMatch.Value;
@@ -647,7 +647,7 @@ namespace furdown
                     else Console.WriteLine("Warning :: unable to extact submission date");
 
                     // extract description
-                    const string key_desc = @"<div class=""submission-description user-submitted-links"">";
+                    const string key_desc = @"<div class=""submission-description-text user-submitted-links"">";
                     cpage = cpage.Substring(cpage.IndexOf(key_desc, StringComparison.Ordinal));
                     cpage = cpage.Substring(0,
                                             cpage.IndexOf(key_enddiv, cpage.IndexOf(key_enddiv, StringComparison.Ordinal) + 1,
